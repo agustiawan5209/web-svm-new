@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('model_storages', function (Blueprint $table) {
             $table->id();
             $table->json('model_path')->comment('Path to the stored Support Vector Machine model');
+            $table->json('weights')->nullable()->comment('Path to the stored Support Vector Machine model');
             $table->timestamps();
         });
     }

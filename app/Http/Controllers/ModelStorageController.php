@@ -92,7 +92,8 @@ class ModelStorageController extends Controller
 
         ModelStorage::updateOrCreate(
             ['model_path' => json_encode($request->model)],
-            ['model_path' => json_encode($request->model)]
+            ['model_path' => json_encode($request->model), 'weights' => json_encode($request->weights)]
+
         );
 
         return response()->json([
@@ -107,6 +108,7 @@ class ModelStorageController extends Controller
         if ($model) {
             return response()->json([
                 'model' => json_decode($model->model_path),
+                'weights' => json_decode($model->weights),
                 'status' => true
             ], 200);
         } else {

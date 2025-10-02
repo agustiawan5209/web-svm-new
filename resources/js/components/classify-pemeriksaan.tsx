@@ -241,6 +241,31 @@ const ClassifyPemeriksaan = ({
                     message: `NIK, Nama, Orang Tua, Tempat Lahir Tidak Boleh Kosong `,
                     type: 'error',
                 });
+            } else {
+                const result = await model.predict([feature ?? []]);
+
+                if (result.error) {
+                    setToast({
+                        title: 'Hasil Prediksi',
+                        show: true,
+                        message: result.error as string,
+                        type: 'success',
+                    });
+                } else {
+                    setPrediction(result);
+                    if (setFeature) {
+                        setFeature(data.kriteria);
+                    }
+                    if (result.label !== undefined && result.label !== null) {
+                        const newLabel = result.label.toString();
+                        console.log('Setting label to:', newLabel);
+                        setData((prevData) => ({ ...prevData, label: newLabel }));
+                        console.log('Data after set (may not be updated yet):', data);
+                        setResult(result);
+                        fetchByLabelSayuran(result.label?.toString() ?? '');
+                        handleOpenDialog();
+                    }
+                }
             }
         } catch (error) {
             console.error(error);
@@ -254,6 +279,12 @@ const ClassifyPemeriksaan = ({
             setLoading(false);
         }
     };
+    useEffect(() => {
+        if (prediction && prediction.label) {
+            console.log('Prediction label changed:', prediction.label);
+            setData('label', prediction.label.toString());
+        }
+    }, [prediction]);
 
     const handleOpenDialog = () => {
         setOpenDialog(true);

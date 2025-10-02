@@ -48,7 +48,20 @@ interface SVMStates {
     prediction: OperationState<PredictionResult>;
     saving: OperationState<void>;
 }
+interface TrainingProgress {
+    epoch: number;
+    loss: number;
+    accuracy: number;
+    valLoss?: number;
+    valAccuracy?: number;
+    status: 'training' | 'completed' | 'error';
+}
 
+interface TrainingCallbacks {
+    onEpochEnd?: (epoch: number, logs: any) => void;
+    onTrainBegin?: (logs: any) => void;
+    onTrainEnd?: (logs: any) => void;
+}
 class SVMModel {
     private trainingData: TrainingData | null = null;
     private splitData: SplitData = {
@@ -68,6 +81,12 @@ class SVMModel {
         prediction: { isLoading: false, error: null },
         saving: { isLoading: false, error: null },
     };
+    private trainingReport: string[] = [];
+    private trainingLoss: string[] = [];
+    private trainingAccuracy: string[] = [];
+    private trainingValLoss: string[] = [];
+    private trainingValAccuracy: string[] = [];
+    private trainingProgress: TrainingProgress[] = [];
 
     // ==================== PUBLIC GETTERS ====================
     public getTrainingData(): TrainingData | null {
@@ -112,6 +131,21 @@ class SVMModel {
         return this.states.saving;
     }
 
+    public getTrainingReport() {
+        return this.trainingReport;
+    }
+    public getTrainingMetrics() {
+        return {
+            loss: this.trainingLoss,
+            accuracy: this.trainingAccuracy,
+            valLoss: this.trainingValLoss,
+            valAccuracy: this.trainingValAccuracy,
+        };
+    }
+    public getTrainingProgress() {
+        return this.trainingProgress;
+    }
+
     // ==================== STATE MANAGEMENT ====================
     private setState<K extends keyof SVMStates>(key: K, update: Partial<OperationState<SVMStates[K]['data']>>) {
         this.states[key] = { ...this.states[key], ...update };
@@ -140,7 +174,6 @@ class SVMModel {
             if (rawTraining.length === 0 || rawKriteria.length === 0) {
                 throw new Error('Data training atau kriteria dari API kosong');
             }
-            console.log(data);
 
             // Process features and labels
             const features: number[][] = [];
@@ -177,7 +210,6 @@ class SVMModel {
                 isLoading: false,
                 data: trainingData,
             });
-
             return trainingData;
         } catch (err) {
             const errorMsg = 'Gagal memuat dataset: ' + (err as Error).message;
@@ -315,7 +347,8 @@ class SVMModel {
         }
     }
 
-    public async trainModel(options?: Partial<ModelOptions>): Promise<void> {
+    // Dalam class SVMModel, update method trainModel
+    public async trainModel(options?: Partial<ModelOptions>, callbacks?: TrainingCallbacks): Promise<void> {
         this.setState('training', { isLoading: true, error: null });
 
         try {
@@ -334,26 +367,65 @@ class SVMModel {
             const numClasses = this.classNames.length;
             const inputDim = this.trainingData.features[0].length;
 
-            // Convert features to float32 dan normalisasi
+            // Convert features to float32
             const trainFeaturesTensor = tf.tensor2d(this.splitData.trainFeatures, undefined, 'float32');
-            const trainLabelsTensor = tf.tensor1d(this.splitData.trainLabelsY, 'int32');
+
+            // Convert labels to float32
+            const trainLabelsTensor = tf.tensor1d(this.splitData.trainLabelsY, 'float32');
 
             // Normalisasi features
             const { mean, variance } = tf.moments(trainFeaturesTensor, 0);
-            const normalizedFeatures = trainFeaturesTensor.sub(mean).div(variance.sqrt().add(1e-7));
+            const adjustedVariance = variance.add(1e-7);
+            const normalizedFeatures = trainFeaturesTensor.sub(mean).div(adjustedVariance.sqrt());
 
             // Create and train model
             this.svmModel = this.createSVMModel(inputDim, numClasses, defaultOptions);
 
             console.log('Memulai training model...');
+            console.log(`Data: ${this.splitData.trainFeatures.length} samples, ${numClasses} classes`);
 
-            await this.svmModel.fit(normalizedFeatures, trainLabelsTensor, {
+            // Panggil callback awal training
+            if (callbacks?.onTrainBegin) {
+                callbacks.onTrainBegin({
+                    samples: this.splitData.trainFeatures.length,
+                    classes: numClasses,
+                    inputDim: inputDim,
+                });
+            }
+
+            // Manual splitting untuk validation data
+            const splitIndex = Math.floor(this.splitData.trainFeatures.length * 0.8);
+
+            const trainFeatures = normalizedFeatures.slice(0, splitIndex);
+            const trainLabels = trainLabelsTensor.slice(0, splitIndex);
+            const valFeatures = normalizedFeatures.slice(splitIndex);
+            const valLabels = trainLabelsTensor.slice(splitIndex);
+
+            // Training dengan callbacks
+            const history = await this.svmModel.fit(trainFeatures, trainLabels, {
                 epochs: 50,
                 batchSize: 32,
-                validationSplit: 0.2,
+                validationData: [valFeatures, valLabels],
                 callbacks: {
-                    onEpochEnd: (epoch, logs) => {
-                        console.log(`Epoch ${epoch + 1}: loss = ${logs?.loss?.toFixed(4)}, accuracy = ${logs?.acc?.toFixed(4)}`);
+                    onEpochEnd: async (epoch, logs) => {
+                        // Panggil custom callback
+                        if (callbacks?.onEpochEnd) {
+                            callbacks.onEpochEnd(epoch, {
+                                loss: logs?.loss || 0,
+                                acc: logs?.acc || 0,
+                                val_loss: logs?.val_loss || 0,
+                                val_acc: logs?.val_acc || 0,
+                            });
+                        }
+                    },
+                    onTrainEnd: () => {
+                        console.log('Training completed');
+                        if (callbacks?.onTrainEnd) {
+                            callbacks.onTrainEnd({
+                                finalLoss: history.history.loss[history.history.loss.length - 1],
+                                finalAccuracy: history.history.acc[history.history.acc.length - 1],
+                            });
+                        }
                     },
                 },
             });
@@ -366,6 +438,11 @@ class SVMModel {
             normalizedFeatures.dispose();
             mean.dispose();
             variance.dispose();
+            adjustedVariance.dispose();
+            trainFeatures.dispose();
+            trainLabels.dispose();
+            valFeatures.dispose();
+            valLabels.dispose();
 
             this.setState('training', { isLoading: false });
         } catch (err) {
@@ -378,7 +455,6 @@ class SVMModel {
             throw new Error(errorMsg);
         }
     }
-
     public async evaluateModel(): Promise<{ accuracy: number; confusionMatrix: number[][] }> {
         this.setState('evaluation', { isLoading: true, error: null });
 

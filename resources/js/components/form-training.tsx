@@ -374,167 +374,168 @@ const FormTraining = ({
                 variant={toast.type}
             />
 
-            {/* Pelatihan Model */}
+            {/* Training Report Section - DIPINDAHKAN KE ATAS */}
             <Card>
                 <CardContent>
-                    <div className="flex flex-wrap gap-3 pt-4">
-                        {(auth.role === 'admin' || (auth.role === 'super_admin' && canEvaluate)) && (
-                            <Button type="button" variant="outline" onClick={handleTrainAndEvaluate} disabled={loading}>
-                                {isTraining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <TrendingUp className="mr-2 h-4 w-4" />}
-                                {isTraining ? 'Training...' : 'Train Model'}
-                            </Button>
-                        )}
-                    </div>
-                    {/* Training Report Section */}
-                    <AnimatePresence>
-                        {showTrainingReport && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="mt-6 overflow-hidden"
-                            >
-                                <div className="rounded-lg border border-gray-200 bg-white p-6">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <h3 className="flex items-center gap-2 text-lg font-semibold">
-                                            <BarChart3 className="h-5 w-5" />
-                                            Training Report
-                                        </h3>
-                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="h-4 w-4" />
-                                                {formatTime(trainingTime)}
-                                            </div>
-                                            {isTraining ? (
-                                                <div className="flex items-center gap-1 text-blue-600">
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                    Training...
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-1 text-green-600">
-                                                    <CheckCircle2 className="h-4 w-4" />
-                                                    Completed
-                                                </div>
-                                            )}
+                    {(auth.role === 'admin' || (auth.role === 'super_admin' && canEvaluate)) && (
+                        <Button type="button" variant="outline" onClick={handleTrainAndEvaluate} className="w-full" disabled={loading}>
+                            {isTraining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <TrendingUp className="mr-2 h-4 w-4" />}
+                            {isTraining ? 'Training...' : 'Train Model'}
+                        </Button>
+                    )}
+                </CardContent>
+            </Card>
+            <AnimatePresence>
+                {showTrainingReport && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-6 overflow-hidden"
+                    >
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="flex items-center gap-2 text-lg font-semibold">
+                                        <BarChart3 className="h-5 w-5" />
+                                        Training Report
+                                    </h3>
+                                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="h-4 w-4" />
+                                            {formatTime(trainingTime)}
                                         </div>
-                                    </div>
-
-                                    {/* Training Metrics */}
-                                    <div className="mb-6 grid grid-cols-2 gap-4">
-                                        <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="rounded-lg bg-blue-50 p-4">
-                                            <div className="text-sm text-blue-600">Current Loss</div>
-                                            <div className="text-2xl font-bold text-blue-700">
-                                                {trainingProgress[trainingProgress.length - 1]?.loss?.toFixed(4) || '0.0000'}
+                                        {isTraining ? (
+                                            <div className="flex items-center gap-1 text-blue-600">
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Training...
                                             </div>
-                                        </motion.div>
-                                        <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="rounded-lg bg-green-50 p-4">
-                                            <div className="text-sm text-green-600">Current Accuracy</div>
-                                            <div className="text-2xl font-bold text-green-700">
-                                                {((trainingProgress[trainingProgress.length - 1]?.accuracy || 0) * 100).toFixed(2)}%
+                                        ) : (
+                                            <div className="flex items-center gap-1 text-green-600">
+                                                <CheckCircle2 className="h-4 w-4" />
+                                                Completed
                                             </div>
-                                        </motion.div>
+                                        )}
                                     </div>
+                                </div>
 
-                                    {/* Training Progress Chart */}
-                                    {chartData.length > 0 && (
-                                        <div className="mb-6 h-64">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <LineChart data={chartData}>
-                                                    <CartesianGrid strokeDasharray="3 3" />
-                                                    <XAxis dataKey="epoch" />
-                                                    <YAxis yAxisId="left" />
-                                                    <YAxis yAxisId="right" orientation="right" />
-                                                    <Tooltip />
-                                                    <Legend />
+                                {/* Training Metrics */}
+                                <div className="mb-6 grid grid-cols-2 gap-4">
+                                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="rounded-lg bg-blue-50 p-4">
+                                        <div className="text-sm text-blue-600">Current Loss</div>
+                                        <div className="text-2xl font-bold text-blue-700">
+                                            {trainingProgress[trainingProgress.length - 1]?.loss?.toFixed(4) || '0.0000'}
+                                        </div>
+                                    </motion.div>
+                                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="rounded-lg bg-green-50 p-4">
+                                        <div className="text-sm text-green-600">Current Accuracy</div>
+                                        <div className="text-2xl font-bold text-green-700">
+                                            {((trainingProgress[trainingProgress.length - 1]?.accuracy || 0) * 100).toFixed(2)}%
+                                        </div>
+                                    </motion.div>
+                                </div>
+
+                                {/* Training Progress Chart */}
+                                {chartData.length > 0 && (
+                                    <div className="mb-6 h-64">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={chartData}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="epoch" />
+                                                <YAxis yAxisId="left" />
+                                                <YAxis yAxisId="right" orientation="right" />
+                                                <Tooltip />
+                                                <Legend />
+                                                <Line
+                                                    yAxisId="left"
+                                                    type="monotone"
+                                                    dataKey="loss"
+                                                    stroke="#ef4444"
+                                                    strokeWidth={2}
+                                                    name="Training Loss"
+                                                    dot={false}
+                                                />
+                                                <Line
+                                                    yAxisId="right"
+                                                    type="monotone"
+                                                    dataKey="accuracy"
+                                                    stroke="#10b981"
+                                                    strokeWidth={2}
+                                                    name="Training Accuracy (%)"
+                                                    dot={false}
+                                                />
+                                                {chartData[0]?.valLoss && (
                                                     <Line
                                                         yAxisId="left"
                                                         type="monotone"
-                                                        dataKey="loss"
-                                                        stroke="#ef4444"
+                                                        dataKey="valLoss"
+                                                        stroke="#f97316"
                                                         strokeWidth={2}
-                                                        name="Training Loss"
+                                                        strokeDasharray="3 3"
+                                                        name="Validation Loss"
                                                         dot={false}
                                                     />
+                                                )}
+                                                {chartData[0]?.valAccuracy && (
                                                     <Line
                                                         yAxisId="right"
                                                         type="monotone"
-                                                        dataKey="accuracy"
-                                                        stroke="#10b981"
+                                                        dataKey="valAccuracy"
+                                                        stroke="#8b5cf6"
                                                         strokeWidth={2}
-                                                        name="Training Accuracy (%)"
+                                                        strokeDasharray="3 3"
+                                                        name="Validation Accuracy (%)"
                                                         dot={false}
                                                     />
-                                                    {chartData[0]?.valLoss && (
-                                                        <Line
-                                                            yAxisId="left"
-                                                            type="monotone"
-                                                            dataKey="valLoss"
-                                                            stroke="#f97316"
-                                                            strokeWidth={2}
-                                                            strokeDasharray="3 3"
-                                                            name="Validation Loss"
-                                                            dot={false}
-                                                        />
-                                                    )}
-                                                    {chartData[0]?.valAccuracy && (
-                                                        <Line
-                                                            yAxisId="right"
-                                                            type="monotone"
-                                                            dataKey="valAccuracy"
-                                                            stroke="#8b5cf6"
-                                                            strokeWidth={2}
-                                                            strokeDasharray="3 3"
-                                                            name="Validation Accuracy (%)"
-                                                            dot={false}
-                                                        />
-                                                    )}
-                                                </LineChart>
-                                            </ResponsiveContainer>
-                                        </div>
-                                    )}
+                                                )}
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
 
-                                    {/* Evaluation Results */}
-                                    {evaluationResult && (
-                                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <Target className="h-5 w-5 text-green-600" />
-                                                <h4 className="font-semibold">Evaluation Results</h4>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-4 text-white">
-                                                    <div className="flex items-center">
-                                                        <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-white" />
-                                                        <div className="ml-4">
-                                                            <h3 className="text-lg font-semibold text-white">Hasil Akurasi Model</h3>
-                                                            <motion.div
-                                                                initial={{ scale: 0 }}
-                                                                animate={{ scale: 1 }}
-                                                                transition={{ type: 'spring', stiffness: 200 }}
-                                                                className="mt-1 text-2xl font-bold text-white"
-                                                            >
-                                                                {(evaluationResult.accuracy * 100).toFixed(1)}%
-                                                            </motion.div>
-                                                            <p className="mt-1 text-sm text-white">Akurasi model pada data testing</p>
-                                                        </div>
+                                {/* Evaluation Results */}
+                                {evaluationResult && (
+                                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            <Target className="h-5 w-5 text-green-600" />
+                                            <h4 className="font-semibold">Evaluation Results</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-4 text-white">
+                                                <div className="flex items-center">
+                                                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-white" />
+                                                    <div className="ml-4">
+                                                        <h3 className="text-lg font-semibold text-white">Hasil Akurasi Model</h3>
+                                                        <motion.div
+                                                            initial={{ scale: 0 }}
+                                                            animate={{ scale: 1 }}
+                                                            transition={{ type: 'spring', stiffness: 200 }}
+                                                            className="mt-1 text-2xl font-bold text-white"
+                                                        >
+                                                            {(evaluationResult.accuracy * 100).toFixed(1)}%
+                                                        </motion.div>
+                                                        <p className="mt-1 text-sm text-white">Akurasi model pada data testing</p>
                                                     </div>
                                                 </div>
-                                                <div className="rounded-lg bg-gray-100 p-4">
-                                                    <div className="text-sm">Total Epochs</div>
-                                                    <div className="text-2xl font-bold text-gray-700">{trainingProgress.length}</div>
-                                                </div>
                                             </div>
-                                        </motion.div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </CardContent>
-            </Card>
-            <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm lg:grid-cols-3">
-                {/* Input Form */}
-                <div className="p-6 md:p-8 lg:col-span-2">
-                    <form onSubmit={(e) => handlePredict(e)} className="space-y-6">
+                                            <div className="rounded-lg bg-gray-100 p-4">
+                                                <div className="text-sm">Total Epochs</div>
+                                                <div className="text-2xl font-bold text-gray-700">{trainingProgress.length}</div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 gap-6 overflow-hidden lg:grid-cols-3">
+                {/* Input Form - Kiri */}
+                <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
+                    <form onSubmit={(e) => handlePredict(e)} className="mt-6 space-y-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {kriteria.map((item, index) => (
                                 <div key={index} className="space-y-2">
@@ -592,8 +593,8 @@ const FormTraining = ({
                     </form>
                 </div>
 
-                {/* Results Sidebar */}
-                <div className="bg-gray-50 p-6 md:p-8">
+                {/* Results Sidebar - Kanan */}
+                <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
                     {/* Prediction Result */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}

@@ -36,8 +36,8 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
     return (
         <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
             {/* Left Side - Hero Section */}
-            <div className="relative hidden h-full flex-col bg-gradient-to-br from-primary to-secondary p-10 lg:flex dark:from-pink-900/20 dark:to-rose-900/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-400/10 to-rose-500/10" />
+            <div className="relative hidden h-full flex-col bg-gradient-to-br from-emerald-500 to-green-600 p-10 lg:flex dark:from-emerald-900/20 dark:to-green-900/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-green-500/10" />
 
                 <div className="relative container mx-auto flex h-full flex-col justify-center">
                     <motion.div
@@ -48,26 +48,26 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     >
                         <motion.div className="flex-1" variants={itemVariants}>
                             <h1 className="mb-6 text-center text-2xl font-bold text-white md:text-4xl lg:text-5xl">
-                                Sistem Deteksi Gizi Ibu Hamil dengan Algoritma SVM
+                                Sistem Rekomendasi Makanan untuk Ibu Hamil dengan Algoritma SVM
                             </h1>
-                            <p className="mb-8 text-justify text-lg leading-relaxed text-yellow-400">
+                            <p className="mb-8 text-justify text-lg leading-relaxed text-yellow-100">
                                 Sistem pintar yang menggunakan <span className="font-semibold text-white">Support Vector Machine (SVM)</span>
-                                untuk mendeteksi status gizi ibu hamil secara akurat. Membantu tenaga medis dan ibu hamil dalam memantau kondisi gizi
-                                selama masa kehamilan.
+                                untuk memberikan rekomendasi makanan yang tepat berdasarkan status gizi ibu hamil. Membantu memastikan asupan nutrisi
+                                yang optimal selama masa kehamilan.
                             </p>
 
                             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                <div className="rounded-lg bg-white/50 p-4 text-center backdrop-blur-sm dark:bg-rose-900/30">
-                                    <div className="text-2xl font-bold text-white">99%</div>
-                                    <div className="text-sm text-yellow-400">Akurasi</div>
+                                <div className="rounded-lg bg-white/20 p-4 text-center backdrop-blur-sm dark:bg-emerald-900/30">
+                                    <div className="text-2xl font-bold text-white">Personal</div>
+                                    <div className="text-sm text-yellow-100">Rekomendasi</div>
                                 </div>
-                                <div className="rounded-lg bg-white/50 p-4 text-center backdrop-blur-sm dark:bg-rose-900/30">
+                                <div className="rounded-lg bg-white/20 p-4 text-center backdrop-blur-sm dark:bg-emerald-900/30">
                                     <div className="text-2xl font-bold text-white">SVM</div>
-                                    <div className="text-sm text-yellow-400">Algoritma</div>
+                                    <div className="text-sm text-yellow-100">Algoritma</div>
                                 </div>
-                                <div className="rounded-lg bg-white/50 p-4 text-center backdrop-blur-sm dark:bg-rose-900/30">
+                                <div className="rounded-lg bg-white/20 p-4 text-center backdrop-blur-sm dark:bg-emerald-900/30">
                                     <div className="text-2xl font-bold text-white">Real-time</div>
-                                    <div className="text-sm text-yellow-400">Deteksi</div>
+                                    <div className="text-sm text-yellow-100">Analisis</div>
                                 </div>
                             </div>
                         </motion.div>
@@ -81,18 +81,42 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                         animate="visible"
                     >
                         <motion.div className="flex items-start gap-3" variants={itemVariants}>
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-white dark:bg-white">✓</div>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-white">
+                                🍎
+                            </div>
                             <div>
-                                <h3 className="font-semibold text-white">Deteksi Cepat</h3>
-                                <p className="text-sm text-white">Analisis data gizi dalam hitungan detik</p>
+                                <h3 className="font-semibold text-white">Rekomendasi Personal</h3>
+                                <p className="text-sm text-white">Menu makanan sesuai kondisi gizi</p>
                             </div>
                         </motion.div>
 
                         <motion.div className="flex items-start gap-3" variants={itemVariants}>
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-white dark:bg-white">✓</div>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-white">
+                                ⚡
+                            </div>
                             <div>
-                                <h3 className="font-semibold text-white">Akurat</h3>
-                                <p className="text-sm text-white">Menggunakan algoritma SVM terbaik</p>
+                                <h3 className="font-semibold text-white">Cepat & Akurat</h3>
+                                <p className="text-sm text-white">Analisis data dalam hitungan detik</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div className="flex items-start gap-3" variants={itemVariants}>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-white">
+                                📊
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-white">Monitoring Gizi</h3>
+                                <p className="text-sm text-white">Pantau perkembangan status gizi</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div className="flex items-start gap-3" variants={itemVariants}>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-white">
+                                🥗
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-white">Menu Sehat</h3>
+                                <p className="text-sm text-white">Rekomendasi makanan bergizi seimbang</p>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -100,7 +124,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
 
                 {quote && (
                     <div className="relative z-20 mt-auto">
-                        <blockquote className="space-y-2 rounded-lg bg-white/30 p-4 backdrop-blur-sm dark:bg-rose-900/30">
+                        <blockquote className="space-y-2 rounded-lg bg-white/20 p-4 backdrop-blur-sm dark:bg-emerald-900/30">
                             <p className="text-lg text-white">&ldquo;{quote.message}&rdquo;</p>
                             <footer className="text-sm text-white">{quote.author}</footer>
                         </blockquote>
@@ -114,14 +138,16 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     {/* Mobile Logo */}
                     <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
                         <div className="flex flex-col items-center">
-                            <AppLogoIcon className="h-12 fill-current text-white sm:h-14" />
-                            <span className="mt-2 text-sm font-semibold text-white">Deteksi Gizi Ibu Hamil</span>
+                            <AppLogoIcon className="h-12 fill-current text-emerald-600 sm:h-14" />
+                            <span className="mt-2 text-sm font-semibold text-emerald-600">Rekomendasi Makanan Ibu Hamil</span>
                         </div>
                     </Link>
 
                     {/* Auth Header */}
                     <div className="flex flex-col items-start gap-3 text-left sm:items-center sm:text-center">
-                        <div className="rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-white dark:bg-rose-900/30">SVM Algorithm</div>
+                        <div className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-900/30">
+                            Nutrition Advisor
+                        </div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
                         <p className="text-sm text-balance text-muted-foreground">{description}</p>
                     </div>
@@ -134,9 +160,22 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     {/* Footer Note */}
                     <div className="text-center">
                         <p className="text-xs text-muted-foreground">
-                            Sistem deteksi gizi menggunakan <span className="font-medium text-white">Support Vector Machine</span>
+                            Sistem rekomendasi makanan menggunakan <span className="font-medium text-emerald-600">Support Vector Machine</span>
                         </p>
                     </div>
+
+                    {/* Quick Nutrition Info */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                        className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20"
+                    >
+                        <h4 className="mb-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">💡 Penting untuk Ibu Hamil</h4>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                            Asupan gizi yang tepat sangat penting untuk kesehatan ibu dan perkembangan janin
+                        </p>
+                    </motion.div>
                 </div>
             </div>
         </div>

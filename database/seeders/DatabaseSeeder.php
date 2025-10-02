@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             KriteriaSeeder::class,
             LabelSeeder::class,
-            DatasetSeeder::class,
+            // DatasetSeeder::class,
             LabelSayuranSeeder::class,
             // JenisTanamanSeeder::class,
         ]);

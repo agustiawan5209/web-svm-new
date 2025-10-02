@@ -1,0 +1,179 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans:
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+:root {
+    --background: oklch(100% 0.00011 271.152);
+    --foreground: oklch(20% 0.03 220);
+
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(20% 0.03 220);
+
+    --popover: oklch(97% 0.02 220);
+    --popover-foreground: oklch(20% 0.03 220);
+
+    --primary: oklch(65% 0.12 250); /* Biru yang lebih menarik */
+    --primary-foreground: oklch(98% 0.02 250);
+
+    --secondary: oklch(85% 0.05 160); /* Hijau mint yang segar */
+    --secondary-foreground: oklch(25% 0.02 160);
+
+    --muted: oklch(92% 0.03 280); /* Ungu lembut */
+    --muted-foreground: oklch(55% 0.03 280);
+
+    --accent: oklch(93.846% 0.09702 146.92); /* Oranye peach yang hangat */
+    --accent-foreground: oklch(25% 0.03 30);
+
+    --destructive: oklch(55% 0.15 25); /* Tetap merah untuk konsistensi */
+    --destructive-foreground: oklch(98% 0.02 25);
+
+    --border: oklch(85% 0.03 220);
+    --input: oklch(85% 0.03 220);
+    --ring: oklch(56% 0.07 250); /* Sesuai dengan primary */
+
+    --chart-1: oklch(50% 0.12 250); /* Biru */
+    --chart-2: oklch(53.342% 0.20487 31.504); /* Hijau */
+    --chart-3: oklch(66.559% 0.11411 206.868); /* Oranye */
+    --chart-4: oklch(67.059% 0.22176 143.384); /* Magenta */
+    --chart-5: oklch(70.959% 0.09738 134.183); /* Ungu */
+
+    --radius: 0.625rem;
+
+    --sidebar: oklch(67.063% 0.16665 248.905); /* Biru sangat lembut */
+    --sidebar-foreground: oklch(20% 0.03 250);
+    --sidebar-primary: oklch(50% 0.1 250);
+    --sidebar-primary-foreground: oklch(98% 0.02 250);
+    --sidebar-accent: oklch(88% 0.04 160); /* Hijau mint */
+    --sidebar-accent-foreground: oklch(25% 0.03 160);
+    --sidebar-border: oklch(85% 0.03 250);
+    --sidebar-ring: oklch(55% 0.08 250);
+}
+.dark {
+    --background: oklch(100% 0.00011 271.152);
+    --foreground: oklch(20% 0.03 220);
+
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(20% 0.03 220);
+
+    --popover: oklch(97% 0.02 220);
+    --popover-foreground: oklch(20% 0.03 220);
+
+    --primary: oklch(65% 0.12 250); /* Biru yang lebih menarik */
+    --primary-foreground: oklch(98% 0.02 250);
+
+    --secondary: oklch(85% 0.05 160); /* Hijau mint yang segar */
+    --secondary-foreground: oklch(25% 0.02 160);
+
+    --muted: oklch(92% 0.03 280); /* Ungu lembut */
+    --muted-foreground: oklch(55% 0.03 280);
+
+    --accent: oklch(93.846% 0.09702 146.92); /* Oranye peach yang hangat */
+    --accent-foreground: oklch(25% 0.03 30);
+
+    --destructive: oklch(55% 0.15 25); /* Tetap merah untuk konsistensi */
+    --destructive-foreground: oklch(98% 0.02 25);
+
+    --border: oklch(85% 0.03 220);
+    --input: oklch(85% 0.03 220);
+    --ring: oklch(56% 0.07 250); /* Sesuai dengan primary */
+
+    --chart-1: oklch(50% 0.12 250); /* Biru */
+    --chart-2: oklch(53.342% 0.20487 31.504); /* Hijau */
+    --chart-3: oklch(66.559% 0.11411 206.868); /* Oranye */
+    --chart-4: oklch(67.059% 0.22176 143.384); /* Magenta */
+    --chart-5: oklch(70.959% 0.09738 134.183); /* Ungu */
+
+    --radius: 0.625rem;
+
+    --sidebar: oklch(67.063% 0.16665 248.905); /* Biru sangat lembut */
+    --sidebar-foreground: oklch(20% 0.03 250);
+    --sidebar-primary: oklch(50% 0.1 250);
+    --sidebar-primary-foreground: oklch(98% 0.02 250);
+    --sidebar-accent: oklch(88% 0.04 160); /* Hijau mint */
+    --sidebar-accent-foreground: oklch(25% 0.03 160);
+    --sidebar-border: oklch(85% 0.03 250);
+    --sidebar-ring: oklch(55% 0.08 250);
+}
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}

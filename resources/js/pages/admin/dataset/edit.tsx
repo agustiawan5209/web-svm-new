@@ -185,6 +185,29 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
                                     </div>
                                 );
                             }
+                            if (item.nama.toLowerCase() === 'pola makan' || item.nama.includes('pola')) {
+                                return (
+                                    <div key={index} className="space-y-2">
+                                        <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
+                                        <Select
+                                            value={data.attribut[index].nilai || ''}
+                                            required
+                                            onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
+                                        >
+                                            <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                                <SelectValue placeholder="Select " />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
+                                                {['kurang', 'sedang', 'baik'].map((jenkel, idx) => (
+                                                    <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
+                                                        {jenkel}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                );
+                            }
                             return (
                                 <div key={index}>
                                     <Label className="text-xs text-gray-600">{item.nama}</Label>

@@ -43,6 +43,7 @@ class DatasetController extends Controller
             "kriteria" => Kriteria::orderBy('id', 'asc')->get(),
             "breadcrumb" => self::BASE_BREADCRUMB,
             "opsiLabel" => Label::orderBy('id', 'desc')->get(),
+            "titlePage" => "Dataset",
         ]);
     }
 

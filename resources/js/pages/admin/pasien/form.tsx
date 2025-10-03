@@ -1,16 +1,19 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Input, InputRadio } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Toast } from '@/components/ui/toast';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { PasienTypes, type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler, useMemo } from 'react';
+import { FormEventHandler, useMemo, useState } from 'react';
 export interface PasienCreaterops {
     breadcrumb?: { title: string; href: string }[];
+    pasien?: PasienTypes;
 }
 type CreateForm = {
+    id: number;
     user_id: string;
     nik: string;
     nama: string;
@@ -19,20 +22,32 @@ type CreateForm = {
     jenis_kelamin: string;
 };
 
-export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
+export default function PasienCreate({ breadcrumb, pasien }: PasienCreaterops) {
     // Memoize breadcrumbs to prevent unnecessary recalculations
     const breadcrumbs: BreadcrumbItem[] = useMemo(
         () => (breadcrumb ? breadcrumb.map((item) => ({ title: item.title, href: item.href })) : []),
         [breadcrumb],
     );
-
-    const { data, setData, get, post, processing, progress, errors, reset } = useForm<Required<CreateForm>>({
-        user_id: '',
-        nik: '',
-        nama: '',
-        tempat_lahir: '',
-        tanggal_lahir: '',
-        jenis_kelamin: '',
+    const [toast, setToast] = useState<{
+        title: string;
+        show: boolean;
+        message: string;
+        type: 'success' | 'default' | 'error';
+    }>({
+        title: '',
+        show: false,
+        message: '',
+        type: 'success',
+    });
+    const [pasienId, setPasienId] = useState<number | null>(pasien ? pasien.id : null);
+    const { data, setData, post, put, processing, progress, errors, reset } = useForm<Required<CreateForm>>({
+        id: pasien?.id ?? 0,
+        user_id: pasien?.user_id ?? '',
+        nik: pasien?.nik ?? '',
+        nama: pasien?.nama ?? '',
+        tempat_lahir: pasien?.tempat_lahir ?? '',
+        tanggal_lahir: pasien?.tanggal_lahir ?? '',
+        jenis_kelamin: pasien?.jenis_kelamin ?? '',
     });
 
     /**
@@ -43,9 +58,45 @@ export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('pasien.store'), {
-            onError: (err) => console.log(err),
-        });
+        if (pasienId) {
+            put(route('pasien.update', { pasien: pasienId }), {
+                onSuccess: (response) => {
+                    setToast({
+                        title: 'Success',
+                        message: 'Data berhasil disimpan',
+                        type: 'success',
+                        show: true,
+                    });
+                },
+                onError: (err) => {
+                    // Format error messages for toast
+                    const errorMessages = typeof err === 'object' ? Object.values(err).flat().join('\n') : String(err);
+
+                    setToast({
+                        title: 'Error',
+                        show: true,
+                        message: errorMessages,
+                        type: 'error',
+                    });
+                    console.log(err);
+                },
+            });
+        } else {
+            post(route('pasien.store'), {
+                onError: (err) => {
+                    // Format error messages for toast
+                    const errorMessages = typeof err === 'object' ? Object.values(err).flat().join('\n') : String(err);
+
+                    setToast({
+                        title: 'Error',
+                        show: true,
+                        message: errorMessages,
+                        type: 'error',
+                    });
+                    console.log(err);
+                },
+            });
+        }
     };
 
     // Hitung tanggal minimum: 1 tahun lalu dari hari ini
@@ -55,7 +106,17 @@ export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
     const minDate = tahunLalu.toISOString().split('T')[0];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create" />
+            <Head title={pasien ? 'Edit Pasien' : 'Create Pasien'} />
+
+            <Toast
+                open={toast.show}
+                onOpenChange={() => setToast((prev) => ({ ...prev, show: false }))}
+                title={toast.title}
+                description={toast.message}
+                duration={10000}
+                variant={toast.type}
+            />
+
             <div className="dark:bg-elevation-1 flex h-full flex-1 flex-col gap-4 rounded-xl p-1 lg:p-4">
                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
                     <div className="p-4 md:p-6">
@@ -71,7 +132,15 @@ export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
                                         tabIndex={1}
                                         autoComplete="nik"
                                         value={data.nik}
-                                        onChange={(e) => setData('nik', e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            // Hanya izinkan angka
+                                            if (/^\d*$/.test(value)) {
+                                                if (value.length <= 16) {
+                                                    setData('nik', e.target.value);
+                                                }
+                                            }
+                                        }}
                                         disabled={processing}
                                         placeholder="Nomor Induk Kependudukan"
                                     />
@@ -127,7 +196,7 @@ export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
                                         <InputError message={errors.tanggal_lahir} />
                                     </div>
                                 </div>
-                                <div className="grid gap-2">
+                                {/* <div className="grid gap-2">
                                     <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
                                     <InputRadio
                                         id="jenis1"
@@ -148,7 +217,7 @@ export default function PasienCreate({ breadcrumb }: PasienCreaterops) {
                                         labelClassName="text-gray-800 dark:text-white"
                                     />
                                     <InputError message={errors.jenis_kelamin} />
-                                </div>
+                                </div> */}
 
                                 <Button type="submit" variant={'default'} className="mt-2 w-full" tabIndex={5} disabled={processing}>
                                     {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}

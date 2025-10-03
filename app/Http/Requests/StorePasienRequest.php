@@ -11,7 +11,7 @@ class StorePasienRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class StorePasienRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nama' => 'required|string|max:255',
+            'nik' => 'required|string|max:16|unique:pasiens,nik',
+            'tanggal_lahir' => 'required|date',
+            // 'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            // 'alamat' => 'required|string|max:500',
+            // 'no_telepon' => 'required|string|max:15',
         ];
     }
 }

@@ -68,6 +68,7 @@ class RoleSeeder extends Seeder
             $prms = Permission::create($value);
             $admin->givePermissionTo($prms);
         }
+        $admin->givePermissionTo(['name' => 'add pasien']);
         $admin->givePermissionTo(['name' => 'delete pasien']);
         $admin->givePermissionTo(['name' => 'edit pasien']);
         $admin->givePermissionTo(['name' => 'read pasien']);

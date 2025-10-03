@@ -186,15 +186,15 @@ export default function PasienIndex({ pasien, breadcrumb, filter, can }: PasienP
                                             <SelectItem value="A-Z">A-Z</SelectItem>
                                             <SelectItem value="Z-A">Z-A</SelectItem>
                                             <SelectItem value="desc">Terbaru</SelectItem>
-                                            <SelectItem value="asc">sTerlama</SelectItem>
+                                            <SelectItem value="asc">Terlama</SelectItem>
                                         </SelectGroup>
                                         <SelectSeparator />
-                                        <SelectGroup>
+                                        {/* <SelectGroup>
                                             <SelectLabel>Jenis Kelamin</SelectLabel>
                                             <SelectItem value="Laki-laki">Laki-Laki</SelectItem>
                                             <SelectItem value="Perempuan">Perempuan</SelectItem>
                                         </SelectGroup>
-                                        <SelectSeparator />
+                                        <SelectSeparator /> */}
                                     </SelectContent>
                                 </Select>
                             </div>

@@ -174,7 +174,7 @@ export default function OrangtuaIndex({ orangtua, breadcrumb, filter }: Orangtua
                                         <SelectItem value="A-Z">A-Z</SelectItem>
                                         <SelectItem value="Z-A">Z-A</SelectItem>
                                         <SelectItem value="desc">Terbaru</SelectItem>
-                                        <SelectItem value="asc">sTerlama</SelectItem>
+                                        <SelectItem value="asc">Terlama</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>

@@ -90,7 +90,7 @@ class PasienController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/pasien/create', [
+        return Inertia::render('admin/pasien/form', [
             'user' => User::withoutRole(['admin', 'super_admin'])->get(),
             'breadcrumb' => array_merge(self::BASE_BREADCRUMB, [
                 [
@@ -135,7 +135,7 @@ class PasienController extends Controller
     public function edit(Pasien $pasien)
     {
         $pasien->load(['user']);
-        return Inertia::render('admin/pasien/edit', [
+        return Inertia::render('admin/pasien/form', [
             'pasien' => $pasien,
             'user' => User::withoutRole('admin')->get(),
             'breadcrumb' => array_merge(self::BASE_BREADCRUMB, [

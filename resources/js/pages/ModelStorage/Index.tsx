@@ -36,7 +36,7 @@ export default function DecisionTreeView({ dataTraining, breadcrumb, titlePage, 
     const totalPages = Math.ceil(dataTraining?.training.length / itemsPerPage);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={titlePage ?? 'Indikator'} />
+            <Head title={titlePage ?? 'Data Training'} />
 
             {/* Data */}
             <Card>

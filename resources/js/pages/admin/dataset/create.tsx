@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, JenisTanamanTypes, KriteriaTypes, LabelTypes } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useCallback } from 'react';
 
 type Dataset = {
     label: string;
@@ -34,29 +35,59 @@ export default function FormDatasetView({ breadcrumb, kriteria, titlePage, opsiL
         })),
     });
 
-    console.log(data.attribut);
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const { name, value } = e.target;
+            const [field, indexStr] = name.split('.');
+            const index = Number(indexStr);
+            if (field === 'attribut') {
+                if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
+                    setData((prev) => {
+                        // Update nilai yang diubah
+                        const updatedKriteria = prev.attribut?.map((item, i) => (i === index ? { ...item, nilai: value } : item));
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+                        // Cari index untuk perhitungan IMT
+                        const BBindex = kriteria.findIndex((k) => k.nama.includes('BB'));
+                        const TBindex = kriteria.findIndex((k) => k.nama.includes('TB'));
+                        const IMTindex = kriteria.findIndex((k) => k.nama.toLowerCase().includes('imt'));
 
-        const key = name.split('.')[1];
-        const numValue = Number(value);
-        if (!isNaN(numValue)) {
-            setData((prevData) => ({
-                ...prevData,
-                attribut: prevData.attribut.map((item, index) => {
-                    if (index === Number(key)) {
+                        // Jika yang diubah adalah BB atau TB, hitung IMT
+                        if ((index === BBindex || index === TBindex) && IMTindex !== -1) {
+                            const nilaiBB = index === BBindex ? Number(value) : Number(updatedKriteria?.[BBindex]?.nilai ?? 0);
+
+                            const nilaiTB = index === TBindex ? Number(value) : Number(updatedKriteria?.[TBindex]?.nilai ?? 0);
+
+                            // Hitung IMT hanya jika kedua nilai valid
+                            if (nilaiBB > 0 && nilaiTB > 0) {
+                                return {
+                                    ...prev,
+                                    attribut: updatedKriteria?.map((item, i) =>
+                                        i === IMTindex ? { ...item, nilai: hitungIMT(nilaiBB, nilaiTB) } : item,
+                                    ),
+                                };
+                            }
+                        }
+
                         return {
-                            ...item,
-                            nilai: value,
+                            ...prev,
+                            attribut: updatedKriteria,
                         };
-                    }
-                    return item;
-                }),
-            }));
-            return;
-        }
+                    });
+                }
+            } else {
+                setData((prev) => ({ ...prev, [name]: value }));
+            }
+        },
+        [kriteria, setData],
+    );
+
+    const hitungIMT = (berat: number, tinggi: number) => {
+        // tinggi dalam meter
+        const tb = tinggi / 100;
+        const imt = berat / (tb * tb);
+        return imt.toFixed(3);
     };
+
     const handleSelectChange = (name: string, value: string) => {
         if (name && value !== undefined && data && data.attribut) {
             if (name === 'label') {

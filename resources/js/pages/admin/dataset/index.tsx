@@ -2,13 +2,13 @@ import { DeleteConfirmationForm } from '@/components/delete-confirmation-form';
 import PaginationTable from '@/components/pagination-table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, DatasetTypes, KriteriaTypes, LabelTypes } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { EyeIcon, PenBoxIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 interface IndikatorIndexProps {
     dataset: {
         current_page: number;
@@ -33,25 +33,107 @@ interface IndikatorIndexProps {
     breadcrumb?: BreadcrumbItem[];
     titlePage?: string;
     opsiLabel: LabelTypes[];
+    filter: {
+        q: string;
+        per_page: string;
+        order_by: string;
+    };
+    can: {
+        add: boolean;
+        edit: boolean;
+        read: boolean;
+        delete: boolean;
+    };
 }
+type GetForm = {
+    q?: string;
+    per_page?: string;
+    order_by?: string;
+};
 
-export default function IndikatorIndex({ dataset, kriteria, breadcrumb, titlePage, opsiLabel }: IndikatorIndexProps) {
+export default function IndikatorIndex({ dataset, kriteria, breadcrumb, titlePage, opsiLabel, filter, can }: IndikatorIndexProps) {
     const breadcrumbs: BreadcrumbItem[] = useMemo(
         () => (breadcrumb ? breadcrumb.map((item) => ({ title: item.title, href: item.href })) : []),
         [breadcrumb],
     );
-    const { get } = useForm();
 
+    const { data, setData, get, processing, errors, reset } = useForm<GetForm>({
+        // q: '',
+        // per_page: '',
+        // order_by: '',
+    });
+
+    /** START SEARCH */
+    // store search query in state
+    const [search, setSearch] = useState(filter?.q ?? '');
+
+    const submitSearch: FormEventHandler = (e) => {
+        e.preventDefault();
+        // clean search query
+        const cleanedSearch = search.trim();
+        if (cleanedSearch.length > 0) {
+            // if search query is not empty, make request to server
+            get(route('admin.dataset.index', { q: cleanedSearch, per_page: filter?.per_page, order_by: filter?.order_by }), {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {},
+            });
+        }
+    };
+
+    // clear search query when form is submitted
+    const clearSearch: FormEventHandler = (e) => {
+        e.preventDefault();
+        setSearch('');
+        reset();
+        // make request to server when search query is cleared
+        get(route('admin.dataset.index'), {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {},
+        });
+    };
+    /** END SEARCH */
+
+    /** Start Order BY (ASC, DESC) */
+    const [orderBy, setOrderBy] = useState(filter?.order_by ?? '');
+
+    useEffect(() => {
+        // clean search query
+        const cleanedOrderBy = orderBy.trim();
+        if (cleanedOrderBy.length > 0) {
+            // if search query is not empty, make request to server
+            get(route('admin.dataset.index', { order_by: cleanedOrderBy, per_page: filter?.per_page, q: filter?.q }), {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {},
+            });
+        }
+    }, [orderBy]);
+    /** END Order BY */
     const [isDeleteDialog, setisDeleteDialog] = useState(false);
 
-    const [orderBy, setorderBy] = useState('');
+    /** Start Request Per_page */
+    const [perPage, setPerPage] = useState(filter?.per_page ?? 10); // Default value lebih baik angka
 
-    const handleOrderBy = (value: string) => {
-        setorderBy(value);
-        get(route('admin.dataset.index', { orderBy: value }), {
-            preserveScroll: true,
-            preserveState: true,
-        });
+    const submitPerPage: FormEventHandler = (e) => {
+        e.preventDefault();
+        const cleanedPerPage = perPage.toString().trim();
+        const numericPerPage = parseInt(cleanedPerPage);
+
+        // Validasi nilai per_page
+        if (!isNaN(numericPerPage) && numericPerPage > 0) {
+            get(
+                route('admin.dataset.index', {
+                    per_page: numericPerPage,
+                }),
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true, // Hindari penumpukan history
+                },
+            );
+        }
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -61,28 +143,36 @@ export default function IndikatorIndex({ dataset, kriteria, breadcrumb, titlePag
             <Card>
                 <div className="px-2">
                     <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 className="text-lg font-bold md:text-xl">Data Gizi Ibu Hamil</h2>
                         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                             <Link href={route('admin.dataset.create')}>
                                 <Button variant={'default'} type="button" className="cursor-pointer">
                                     Tambah Data
                                 </Button>
                             </Link>
-
-                            <div className="max-w-sm">
-                                <Select value={orderBy} required onValueChange={(value: string) => handleOrderBy(value)}>
-                                    <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                        <SelectValue placeholder="Pilih Label " />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
-                                        {opsiLabel.map((label, idx) => (
-                                            <SelectItem key={idx} value={label.nama} className="px-4 py-2 hover:bg-gray-50">
-                                                {label.nama}
+                        </div>
+                        <div className="col-span-1 px-1 py-1 lg:px-4 lg:py-2">
+                            <Select defaultValue="" value={orderBy} onValueChange={(e) => setOrderBy(e)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Tampilan Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Urutkan</SelectLabel>
+                                        <SelectItem value="desc">Terbaru</SelectItem>
+                                        <SelectItem value="asc">Terlama</SelectItem>
+                                    </SelectGroup>
+                                    <SelectSeparator />
+                                    <SelectGroup>
+                                        <SelectLabel>Status Gizi</SelectLabel>
+                                        {opsiLabel.map((item: any, index) => (
+                                            <SelectItem key={index} value={item.nama}>
+                                                {item.nama}
                                             </SelectItem>
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    </SelectGroup>
+                                    <SelectSeparator />
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <div className="overflow-x-auto rounded-md border">
@@ -132,7 +222,7 @@ export default function IndikatorIndex({ dataset, kriteria, breadcrumb, titlePag
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="py-4 text-center">
+                                        <TableCell colSpan={10} className="py-4 text-center">
                                             No data found
                                         </TableCell>
                                     </TableRow>

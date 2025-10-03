@@ -1,6 +1,6 @@
+import FormLoopKriteria from '@/components/form-loop-kriteria';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
@@ -20,7 +20,7 @@ interface PropsDatasetView {
 type Form = {
     id: number;
     label: string;
-    attribut: {
+    kriteria: {
         kriteria_id: number;
         nilai: string | null;
     }[];
@@ -33,8 +33,8 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
     const { data, setData, put, processing, errors } = useForm<Form>({
         id: dataset?.id ?? 0,
         label: dataset?.label || '',
-        attribut: kriteria.map((kriteriaItem) => {
-            // Find the existing attribute value if editing
+        kriteria: kriteria.map((kriteriaItem) => {
+            // Find the existing kriteriae value if editing
             const existingAttribut = dataset?.detail.find((attr) => Number(attr.kriteria_id) === Number(kriteriaItem.id));
             return {
                 kriteria_id: Number(kriteriaItem.id),
@@ -47,11 +47,11 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
             const { name, value } = e.target;
             const [field, indexStr] = name.split('.');
             const index = Number(indexStr);
-            if (field === 'attribut') {
+            if (field === 'kriteria') {
                 if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
                     setData((prev) => {
                         // Update nilai yang diubah
-                        const updatedKriteria = prev.attribut?.map((item, i) => (i === index ? { ...item, nilai: value } : item));
+                        const updatedKriteria = prev.kriteria?.map((item, i) => (i === index ? { ...item, nilai: value } : item));
 
                         // Cari index untuk perhitungan IMT
                         const BBindex = kriteria.findIndex((k) => k.nama.includes('BB'));
@@ -68,7 +68,7 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
                             if (nilaiBB > 0 && nilaiTB > 0) {
                                 return {
                                     ...prev,
-                                    attribut: updatedKriteria?.map((item, i) =>
+                                    kriteria: updatedKriteria?.map((item, i) =>
                                         i === IMTindex ? { ...item, nilai: hitungIMT(nilaiBB, nilaiTB) } : item,
                                     ),
                                 };
@@ -77,7 +77,7 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
 
                         return {
                             ...prev,
-                            attribut: updatedKriteria,
+                            kriteria: updatedKriteria,
                         };
                     });
                 }
@@ -95,7 +95,7 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
     };
 
     const handleSelectChange = (name: string, value: string) => {
-        if (name && value !== undefined && data && data.attribut) {
+        if (name && value !== undefined && data && data.kriteria) {
             if (name === 'label') {
                 setData((prevData) => ({
                     ...prevData,
@@ -104,7 +104,7 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
             } else {
                 setData((prevData) => ({
                     ...prevData,
-                    attribut: prevData.attribut.map((item, index) => {
+                    kriteria: prevData.kriteria.map((item, index) => {
                         if (index === Number(name)) {
                             return {
                                 ...item,
@@ -117,7 +117,7 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
                 }));
             }
         } else {
-            console.error('Invalid data: name, value, or attribut may be undefined');
+            console.error('Invalid data: name, value, or kriteria may be undefined');
         }
     };
     const handleSubmit = (e: React.FormEvent) => {
@@ -160,69 +160,14 @@ export default function EditDatasetView({ breadcrumb, kriteria, titlePage, datas
                     </div>
 
                     {/* Parameter Lingkungan */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {kriteria.map((item: any, index: number) => {
-                            if (item.nama.toLowerCase() === 'jenis kelamin') {
-                                return (
-                                    <div key={index} className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
-                                        <Select
-                                            value={data.attribut[index].nilai || ''}
-                                            required
-                                            onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
-                                        >
-                                            <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                                <SelectValue placeholder="Select " />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
-                                                {['Laki-laki', 'Perempuan'].map((jenkel, idx) => (
-                                                    <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
-                                                        {jenkel}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                );
-                            }
-                            if (item.nama.toLowerCase() === 'pola makan' || item.nama.includes('pola')) {
-                                return (
-                                    <div key={index} className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
-                                        <Select
-                                            value={data.attribut[index].nilai || ''}
-                                            required
-                                            onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
-                                        >
-                                            <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                                <SelectValue placeholder="Select " />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
-                                                {['kurang', 'sedang', 'baik'].map((jenkel, idx) => (
-                                                    <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
-                                                        {jenkel}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                );
-                            }
-                            return (
-                                <div key={index}>
-                                    <Label className="text-xs text-gray-600">{item.nama}</Label>
-                                    <Input
-                                        type="text"
-                                        name={`attribut.${index}`}
-                                        value={data.attribut[index].nilai || ''}
-                                        onChange={handleChange}
-                                        className="input-minimal"
-                                        placeholder={`masukkan ${item.nama}`}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <FormLoopKriteria
+                        kriteria={kriteria}
+                        data={data}
+                        setData={setData}
+                        handleChange={handleChange}
+                        handleSelectChange={handleSelectChange}
+                        processing={processing}
+                    />
                     <div className="flex justify-end">
                         <Button type="submit" variant={'default'}>
                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}

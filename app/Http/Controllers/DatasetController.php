@@ -30,14 +30,27 @@ class DatasetController extends Controller
      */
     public function index(Request $request)
     {
-        $datasets = Dataset::query();
+        $query = Dataset::query();
 
-        if ($request->filled('orderBy')) {
-            $datasets->where('label', $request->orderBy);
+        if ($request->filled('order_by')) {
+            $orderBy = $request->input('order_by');
+            if (in_array($orderBy, ['asc', 'desc'])) {
+                $query->orderBy('created_at', $orderBy);
+            } else if (in_array($orderBy, Label::pluck('nama')->toArray())) {
+
+                $query->where('label', $orderBy);
+            } else {
+                // Handle invalid order_by value
+                return redirect()->back()->withErrors(['order_by' => 'Invalid order_by value']);
+            }
         }
-        $datasets->with(['detail', 'detail.kriteria']);
 
-        $datasets = $datasets->paginate(10);
+        try {
+            $datasets = $query->with(['detail', 'detail.kriteria'])->paginate($request->input('per_page', 10));
+        } catch (\Exception $e) {
+            // Handle pagination error
+            return redirect()->back()->withErrors(['pagination' => 'Pagination failed: ' . $e->getMessage()]);
+        }
         return Inertia::render("admin/dataset/index", [
             "dataset" => $datasets,
             "kriteria" => Kriteria::orderBy('id', 'asc')->get(),
@@ -79,16 +92,16 @@ class DatasetController extends Controller
     {
         $dataset = new Dataset();
         $dataset->label = $request['label'];
-        $dataset->data = json_encode($request['attribut']);
+        $dataset->data = json_encode($request['kriteria']);
         $dataset->save();
 
-        for ($i = 0; $i < count($request['attribut']); $i++) {
-            $attribut =  $request['attribut'][$i];
+        for ($i = 0; $i < count($request['kriteria']); $i++) {
+            $kriteria =  $request['kriteria'][$i];
 
             DetailDataset::create([
-                'kriteria_id' =>  $attribut['kriteria_id'],
+                'kriteria_id' =>  $kriteria['kriteria_id'],
                 'dataset_id' =>  $dataset->id,
-                'nilai' =>  $attribut['nilai'],
+                'nilai' =>  $kriteria['nilai'],
             ]);
         }
     }
@@ -142,18 +155,18 @@ class DatasetController extends Controller
     private function editDataset($request, $dataset)
     {
         $dataset->label = $request['label'];
-        $dataset->data = json_encode($request['attribut']);
+        $dataset->data = json_encode($request['kriteria']);
         $dataset->save();
 
         DetailDataset::where('dataset_id', $dataset->id)->delete();
 
-        for ($i = 0; $i < count($request['attribut']); $i++) {
-            $attribut =  $request['attribut'][$i];
+        for ($i = 0; $i < count($request['kriteria']); $i++) {
+            $kriteria =  $request['kriteria'][$i];
 
             DetailDataset::create([
-                'kriteria_id' =>  $attribut['kriteria_id'],
+                'kriteria_id' =>  $kriteria['kriteria_id'],
                 'dataset_id' =>  $dataset->id,
-                'nilai' =>  $attribut['nilai'],
+                'nilai' =>  $kriteria['nilai'],
             ]);
         }
     }

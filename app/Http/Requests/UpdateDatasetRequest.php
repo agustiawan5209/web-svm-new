@@ -22,8 +22,8 @@ class UpdateDatasetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'label'=> 'required|string|max:50',
-            'attribut'=> 'required',
+            'label' => 'required|string|max:50',
+            'kriteria' => 'required',
         ];
     }
 }

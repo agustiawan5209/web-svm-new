@@ -61,6 +61,18 @@ class ModelStorageController extends Controller
             foreach ($row->detail as $key => $detail) {
                 if (strtolower($detail->kriteria->nama) == 'jenis kelamin') {
                     $attribut[$key] = strtolower($detail->nilai) == 'laki-laki' ? 0 : 1;
+                } elseif (strtolower($detail->kriteria->nama) == 'pola makan') {
+                    switch (strtolower($detail->nilai)) {
+                        case 'kurang':
+                            $attribut[$key] = 0;
+                            break;
+                        case 'sedang':
+                            $attribut[$key] = 1;
+                            break;
+                        default:
+                            $attribut[$key] = 2;
+                            break;
+                    }
                 } else {
                     $attribut[$key] = floatval($detail->nilai);
                 }

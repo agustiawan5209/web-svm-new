@@ -28,7 +28,7 @@ class StorePemeriksaanRequest extends FormRequest
             "nama" => "required|string|max:100",
             "tempat_lahir" => "required|string|max:100",
             "tanggal_lahir" => "required|date",
-            "jenis_kelamin" => "required|string|in:Laki-laki,Perempuan",
+            "jenis_kelamin" => "nullable|string|in:Laki-laki,Perempuan",
             "tanggal_pemeriksaan" => "required|date",
             "label" => "required|string|max:100",
 

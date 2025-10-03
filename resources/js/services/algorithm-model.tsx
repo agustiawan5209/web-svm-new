@@ -26,6 +26,7 @@ interface PredictionResult {
     label: string | string[] | null;
     rekomendasi: string | null;
     error: string | null;
+    confidence?: number;
 }
 
 interface ModelOptions {
@@ -285,29 +286,69 @@ class SVMModel {
                 throw new Error(`API returned status ${response.status}`);
             }
 
-            const modelData = response.data;
+            const modelData: any = response.data;
 
             // Handle different response formats
             let modelJSON: any;
             let weightsData: any[] = [];
 
-            if (typeof modelData === 'string') {
-                const parsed = JSON.parse(modelData);
-                modelJSON = parsed.model;
-                weightsData = parsed.weights || [];
-            } else if (typeof modelData === 'object') {
-                modelJSON = modelData.model;
-                weightsData = modelData.weights || [];
+            const model = modelData.model;
+            const weights = modelData.weights;
+
+            if (!model) {
+                throw new Error('Data model dari API tidak valid');
+            }
+            // If model is a JSON string, parse it
+            if (typeof model === 'string') {
+                const parsed = JSON.parse(model);
+                modelJSON = parsed;
+            } else if (typeof model === 'object') {
+                modelJSON = model;
+            } else {
+                throw new Error('Format model tidak dikenali');
+            }
+            if (typeof weights === 'string') {
+                const weight = JSON.parse(weights);
+                weightsData = weight || [];
+            } else if (typeof weights === 'object') {
+                weightsData = weights || [];
             } else {
                 throw new Error('Format model tidak dikenali');
             }
 
+            // PERBAIKAN: Handle different model JSON formats
+            let modelTopology: any;
+
+            // Check if the response has the expected TensorFlow.js format
+            if (modelJSON) {
+                // Format standard TensorFlow.js
+                modelTopology = modelJSON;
+                weightsData = weightsData;
+            } else if (modelJSON.class_name && modelJSON.config) {
+                // Format langsung model architecture (seperti yang Anda terima)
+                modelTopology = modelJSON;
+            } else {
+                throw new Error('Format model JSON tidak dikenali');
+            }
+
             // Load model architecture
-            this.svmModel = await tf.models.modelFromJSON(modelJSON);
+            this.svmModel = await tf.models.modelFromJSON(modelTopology);
 
             // Reconstruct weights if available
             if (weightsData.length > 0 && this.svmModel) {
-                const weightTensors = weightsData.map((w, i) => tf.tensor(w, this.svmModel!.weights[i].shape, 'float32'));
+                // PERBAIKAN: Pastikan format weights sesuai
+                const weightTensors = weightsData.map((w, i) => {
+                    // Jika weightsData sudah dalam format yang benar
+                    if (Array.isArray(w)) {
+                        return tf.tensor(w, modelJSON.weights?.[i]?.shape || undefined, 'float32');
+                    }
+                    // Jika weightsData adalah objek dengan shape dan data
+                    else if (w.shape && w.data) {
+                        return tf.tensor(w.data, w.shape, 'float32');
+                    }
+                    throw new Error(`Format weights tidak dikenali pada index ${i}`);
+                });
+
                 this.svmModel.setWeights(weightTensors);
 
                 // Cleanup temporary tensors
@@ -315,20 +356,20 @@ class SVMModel {
             }
 
             // Load metadata
-            if (modelData.featureNames) {
+            if (modelJSON.featureNames) {
                 this.trainingData = {
                     ...(this.trainingData || {}),
-                    featureNames: modelData.featureNames,
-                    label: modelData.labels || [],
+                    featureNames: modelJSON.featureNames,
+                    label: modelJSON.labels || [],
                 };
             }
 
-            if (modelData.classNames) {
-                this.classNames = modelData.classNames;
+            if (modelJSON.classNames) {
+                this.classNames = modelJSON.classNames;
             }
 
-            if (modelData.labelMap) {
-                this.labelMap = new Map(modelData.labelMap);
+            if (modelJSON.labelMap) {
+                this.labelMap = new Map(modelJSON.labelMap);
             }
 
             this.setState('modelLoading', {
@@ -340,6 +381,58 @@ class SVMModel {
         } catch (err) {
             const errorMsg = 'Gagal memuat model: ' + (err as Error).message;
             this.setState('modelLoading', {
+                isLoading: false,
+                error: errorMsg,
+            });
+            throw new Error(errorMsg);
+        }
+    }
+    public async saveModel(): Promise<void> {
+        this.setState('saving', { isLoading: true, error: null });
+
+        try {
+            if (!this.svmModel) {
+                throw new Error('Tidak ada model yang tersedia untuk disimpan');
+            }
+
+            // Convert model to JSON
+            const modelJSON = this.svmModel.toJSON();
+
+            // Get weights as arrays
+            const weights = this.svmModel.getWeights();
+            const weightArrays = weights.map((w) => {
+                return {
+                    data: Array.from(w.dataSync()),
+                    shape: w.shape,
+                    dtype: w.dtype,
+                };
+            });
+
+            // PERBAIKAN: Gunakan format yang konsisten
+            const modelData = {
+                model: modelJSON, // Format standard TensorFlow.js
+                weights: weightArrays,
+                featureNames: this.trainingData?.featureNames,
+                labels: this.trainingData?.label,
+                classNames: this.classNames,
+                labelMap: Array.from(this.labelMap.entries()),
+                metadata: {
+                    savedAt: new Date().toISOString(),
+                    inputDim: this.trainingData?.features[0]?.length,
+                    numClasses: this.classNames.length,
+                },
+            };
+
+            const response = await axios.post(route('ModelStorage.store'), modelData);
+
+            if (response.status !== 200) {
+                throw new Error(`Gagal menyimpan model: ${response.statusText}`);
+            }
+
+            this.setState('saving', { isLoading: false });
+        } catch (err) {
+            const errorMsg = 'Gagal menyimpan model: ' + (err as Error).message;
+            this.setState('saving', {
                 isLoading: false,
                 error: errorMsg,
             });
@@ -430,7 +523,7 @@ class SVMModel {
                 },
             });
 
-            console.log('Training selesai');
+            console.log('Training selesai', this.svmModel);
 
             // Cleanup tensors
             trainFeaturesTensor.dispose();
@@ -540,7 +633,24 @@ class SVMModel {
             rekomendasi: rekomendasi ?? '',
         };
     }
+    private calculateDetailedConfidence = (predictions: any) => {
+        const results = [];
 
+        // Untuk setiap prediksi
+        for (let i = 0; i < predictions.shape[0]; i++) {
+            const probs = predictions.slice([i, 0], [1, -1]).dataSync();
+            const maxProb = Math.max(...probs);
+            const predictedClass = probs.indexOf(maxProb);
+
+            results.push({
+                predictedClass: predictedClass,
+                confidence: Math.round(maxProb * 100),
+                allProbabilities: Array.from(probs).map((p) => Math.round(p * 100)),
+            });
+        }
+
+        return results;
+    };
     public async predict(features: number[] | number[][]): Promise<PredictionResult> {
         this.setState('prediction', { isLoading: true, error: null });
 
@@ -583,7 +693,6 @@ class SVMModel {
             predictions.dispose();
             mean.dispose();
             variance.dispose();
-
             const result: PredictionResult = {
                 prediction: predictionsArray.length === 1 ? predictionsArray[0] : predictionsArray,
                 label: label,
@@ -600,58 +709,6 @@ class SVMModel {
         } catch (err) {
             const errorMsg = 'Prediksi gagal: ' + (err as Error).message;
             this.setState('prediction', {
-                isLoading: false,
-                error: errorMsg,
-            });
-            throw new Error(errorMsg);
-        }
-    }
-
-    public async saveModel(): Promise<void> {
-        this.setState('saving', { isLoading: true, error: null });
-
-        try {
-            if (!this.svmModel) {
-                throw new Error('Tidak ada model yang tersedia untuk disimpan');
-            }
-
-            // Convert model to JSON
-            const modelJSON = this.svmModel.toJSON();
-
-            // Get weights as arrays
-            const weights = this.svmModel.getWeights();
-            const weightArrays = weights.map((w) => Array.from(w.dataSync()));
-
-            const modelData = {
-                model: modelJSON,
-                weights: weightArrays,
-                weightSpecs: weights.map((w) => ({
-                    shape: w.shape,
-                    dtype: w.dtype,
-                })),
-                featureNames: this.trainingData?.featureNames,
-                labels: this.trainingData?.label,
-                classNames: this.classNames,
-                labelMap: Array.from(this.labelMap.entries()),
-                metadata: {
-                    savedAt: new Date().toISOString(),
-                    inputDim: this.trainingData?.features[0]?.length,
-                    numClasses: this.classNames.length,
-                },
-            };
-
-            const response = await axios.post(route('ModelStorage.store'), {
-                model: JSON.stringify(modelData),
-            });
-
-            if (response.status !== 200) {
-                throw new Error(`Gagal menyimpan model: ${response.statusText}`);
-            }
-
-            this.setState('saving', { isLoading: false });
-        } catch (err) {
-            const errorMsg = 'Gagal menyimpan model: ' + (err as Error).message;
-            this.setState('saving', {
                 isLoading: false,
                 error: errorMsg,
             });

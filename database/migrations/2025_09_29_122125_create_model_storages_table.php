@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->json('model_path')->comment('Path to the stored Support Vector Machine model');
             $table->json('weights')->nullable()->comment('Path to the stored Support Vector Machine model');
+            $table->json('metadata')->nullable()->comment('Metadata for the stored Support Vector Machine model');
             $table->timestamps();
         });
     }

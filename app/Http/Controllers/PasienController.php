@@ -23,7 +23,7 @@ class PasienController extends Controller
         ],
     ];
 
-    public function getByNik($user_id, $nik)
+    public function getByNik($nik)
     {
         $pasien = Pasien::where('nik', '=', $nik)->with('user')->first();
 

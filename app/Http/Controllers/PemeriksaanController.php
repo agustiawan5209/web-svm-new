@@ -118,7 +118,7 @@ class PemeriksaanController extends Controller
         try {
             $pasienData = $request->except('kriteria', 'tanggal_pemeriksaan');
 
-            $existingPasienWithNama = Pasien::where('nik', '=', $request->nik)->where('user_id', '=', $request->user_id)->first();
+            $existingPasienWithNama = Pasien::where('nik', '=', $request->nik)->first();
             if ($existingPasienWithNama) {
                 $pasien = $existingPasienWithNama;
             } else {
@@ -139,7 +139,7 @@ class PemeriksaanController extends Controller
             ];
             $pemeriksaan = Pemeriksaan::create($pemeriksaanData);
 
-            $this->createDetailPemeriksaan($pemeriksaan, $request->input('kriteria'), $pasien->jenis_kelamin, $request->input('label'));
+            $this->createDetailPemeriksaan($pemeriksaan, $request->input('kriteria'), '', $request->input('label'));
 
             if (auth()->user()->hasRole('user')) {
                 return redirect()->route('guest.klasifikasi.index')->with('success', 'Data pemeriksaan berhasil ditambahkan!');
@@ -176,12 +176,15 @@ class PemeriksaanController extends Controller
         }, $kriteria);
 
         // Add jenis kelamin kriteriae if exists
-        if ($jenkelKriteria = Kriteria::where('nama', 'like', '%jenis kelamin%')->first()) {
-            $detailRecords[] = [
-                'pemeriksaan_id' => $pemeriksaan->id,
-                'kriteria_id' => $jenkelKriteria->id,
-                'nilai' => $jenisKelamin,
-            ];
+        $existJenkel = Kriteria::where('nama', 'like', '%jenis kelamin%')->first();
+        if ($existJenkel && !empty($jenisKelamin)) {
+            if ($jenkelKriteria = Kriteria::where('nama', 'like', '%jenis kelamin%')->first()) {
+                $detailRecords[] = [
+                    'pemeriksaan_id' => $pemeriksaan->id,
+                    'kriteria_id' => $jenkelKriteria->id,
+                    'nilai' => $jenisKelamin,
+                ];
+            }
         }
         if ($statusKriteria = Kriteria::where('nama', 'like', '%status%')->first()) {
             $detailRecords[] = [

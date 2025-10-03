@@ -173,7 +173,7 @@ Route::get('/api/model-storage/get-data', [ModelStorageController::class, 'getDa
 Route::get('/api/get-sayuran', [JenisTanamanController::class, 'getSayuran'])->name('api.get.sayuran');
 
 // get pasien by nik
-Route::get('/api/get-pasien-by-nik/{user_id}/{nik}', [PasienController::class, 'getByNik'])->name('api.get.pasien-by-nik');
+Route::get('/api/get-pasien-by-nik/{nik}', [PasienController::class, 'getByNik'])->name('api.get.pasien-by-nik');
 
 
 // get klasifikasi usia berdasarkan dari parameter $usia

@@ -1,0 +1,2 @@
+cek Pada menu Pengguna dengan melakukan prediksi
+tambahkan beberapa halaman pada halaman awal agar menjelaskan tentang sistem ini

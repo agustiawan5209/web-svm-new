@@ -1,7 +1,6 @@
 import { DeleteConfirmationForm } from '@/components/delete-confirmation-form';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, KriteriaTypes } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle, PenBox } from 'lucide-react';
+import { LoaderCircle, PenBox, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 interface KriteriaIndexProps {
     kriteria: KriteriaTypes[];
@@ -96,18 +95,28 @@ export default function KriteriaIndex({ kriteria, breadcrumb, titlePage }: Krite
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={titlePage ?? 'Kriteria'} />
 
-            {/* Data */}
-            <Card>
-                <CardContent>
-                    <div className="px-2">
-                        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 className="text-lg font-bold md:text-xl">Kriteria Gizi Ibu Hamil</h2>
-                            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                                <Button variant={'default'} type="button" className="cursor-pointer" onClick={() => setIsOpenDialog(true)}>
-                                    Tambah Data
-                                </Button>
-                            </div>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-900/20">
+                <div className="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
+                    {/* Header Section */}
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl dark:text-white">Data Kriteria Gizi Ibu Hamil</h1>
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                Kelola kriteria/parameter yang digunakan untuk deteksi gizi ibu hamil
+                            </p>
                         </div>
+                        <Button
+                            onClick={() => setIsOpenDialog(true)}
+                            type="button"
+                            size="lg"
+                            className="flex cursor-pointer items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:from-blue-700 hover:to-purple-700"
+                        >
+                            <Plus className="h-5 w-5" />
+                            Data Pasien Baru
+                        </Button>
+                    </div>
+
+                    <div className="overflow-hidden rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
                         <div className="overflow-x-auto rounded-sm border">
                             <Table className="min-w-full">
                                 <TableHeader>
@@ -159,9 +168,8 @@ export default function KriteriaIndex({ kriteria, breadcrumb, titlePage }: Krite
                             </Table>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
-
+                </div>
+            </div>
             <Dialog open={isOpenDialog} onOpenChange={setIsOpenDialog}>
                 <DialogContent>
                     <DialogHeader>

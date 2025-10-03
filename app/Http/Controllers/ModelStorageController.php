@@ -98,13 +98,16 @@ class ModelStorageController extends Controller
         if ($valid->fails()) {
             return response()->json([
                 'error' => $valid->errors()->first(),
-                'status' => false
+                'status' => 100,
             ]);
         }
 
         ModelStorage::updateOrCreate(
-            ['model_path' => json_encode($request->model)],
-            ['model_path' => json_encode($request->model), 'weights' => json_encode($request->weights)]
+            ['model_path' => $request->model],
+            [
+                'model_path' => $request->model,
+                'weights' => $request->weights
+            ]
 
         );
 
@@ -119,8 +122,8 @@ class ModelStorageController extends Controller
         $model = ModelStorage::latest()->first();
         if ($model) {
             return response()->json([
-                'model' => json_decode($model->model_path),
-                'weights' => json_decode($model->weights),
+                'model' => $model->model_path,
+                'weights' => $model->weights,
                 'status' => true
             ], 200);
         } else {

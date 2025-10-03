@@ -537,41 +537,68 @@ const FormTraining = ({
                 <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
                     <form onSubmit={(e) => handlePredict(e)} className="mt-6 space-y-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            {kriteria.map((item, index) => (
-                                <div key={index} className="space-y-2">
-                                    <Label className="text-sm font-medium text-gray-700">
-                                        {item.nama.charAt(0).toUpperCase() + item.nama.slice(1)}
-                                    </Label>
-                                    {item.nama.toLowerCase() === 'jenis kelamin' ? (
-                                        <Select
-                                            value={data.kriteria[index] || ''}
-                                            required
-                                            onValueChange={(value) => handleSelectChange(index.toString(), value)}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Jenis Kelamin" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {['Laki-laki', 'Perempuan'].map((gender, idx) => (
-                                                    <SelectItem key={idx} value={gender}>
-                                                        {gender}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    ) : (
+                            {kriteria.map((item: KriteriaTypes, index: number) => {
+                                const lowerCaseName = item.nama.toLowerCase();
+                                if (lowerCaseName === 'jenis kelamin') {
+                                    return (
+                                        <div key={index} className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
+                                            <Select
+                                                value={data.kriteria?.[index] || ''}
+                                                required
+                                                onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
+                                            >
+                                                <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                                    <SelectValue placeholder="Select " />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
+                                                    {['Laki-laki', 'Perempuan'].map((jenkel, idx) => (
+                                                        <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
+                                                            {jenkel}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    );
+                                }
+                                if (lowerCaseName === 'pola makan') {
+                                    return (
+                                        <div key={index} className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
+                                            <Select
+                                                value={data.kriteria?.[index] || ''}
+                                                required
+                                                onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
+                                            >
+                                                <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                                    <SelectValue placeholder="Select " />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
+                                                    {['kurang', 'sedang', 'baik'].map((jenkel, idx) => (
+                                                        <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
+                                                            {jenkel}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={index}>
+                                        <Label className="text-xs text-gray-600">{item.nama}</Label>
                                         <Input
                                             type="text"
                                             name={`kriteria.${index}`}
-                                            value={data.kriteria[index] || ''}
+                                            value={data.kriteria?.[index] || ''}
                                             onChange={handleChange}
-                                            placeholder={`Enter ${item.nama}`}
-                                            disabled={processing}
-                                            required
+                                            className="input-minimal"
+                                            placeholder={`masukkan ${item.nama}`}
                                         />
-                                    )}
-                                </div>
-                            ))}
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <div className="flex flex-wrap gap-3 pt-4">
@@ -587,7 +614,7 @@ const FormTraining = ({
                                 className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
                             >
                                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                Mulai Rekomendasi
+                                Lakukan Uji Coba
                             </Button>
                         </div>
                     </form>
@@ -618,7 +645,6 @@ const FormTraining = ({
                             <div className="ml-4">
                                 <h3 className="text-lg font-semibold">Status Gizi Ibu Hamil</h3>
                                 <motion.div
-                                    key={prediction?.label}
                                     initial={{ scale: 0.8, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     className="mt-1 text-2xl font-bold"

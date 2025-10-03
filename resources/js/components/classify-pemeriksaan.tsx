@@ -3,14 +3,27 @@
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toast } from '@/components/ui/toast';
 import SVMModel from '@/services/algorithm-model';
 import { KriteriaTypes, LabelTypes, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
-import { LeafyGreen, Loader2, LoaderCircle } from 'lucide-react';
+import {
+    Activity,
+    AlertCircle,
+    Calendar,
+    CheckCircle,
+    Heart,
+    LeafyGreen,
+    Loader2,
+    LoaderCircle,
+    MapPin,
+    PersonStandingIcon,
+    Scale,
+    User,
+} from 'lucide-react';
 import React, { FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import FormLoopKriteria from './form-loop-kriteria';
 import InputError from './input-error';
 import TableLabelSayuran from './table-label-sayuran';
 import { Button } from './ui/button';
@@ -159,6 +172,32 @@ const ClassifyPemeriksaan = ({
         },
         [kriteria, setData],
     );
+    const handleSelectChange = (name: string, value: string) => {
+        if (name && value !== undefined && data && data.kriteria) {
+            if (name === 'label') {
+                setData((prevData) => ({
+                    ...prevData,
+                    [name]: value,
+                }));
+            } else {
+                setData((prevData) => ({
+                    ...prevData,
+                    kriteria: prevData.kriteria?.map((item, index) => {
+                        if (index === Number(name)) {
+                            return {
+                                ...item,
+                                nilai: value,
+                            };
+                        } else {
+                            return item;
+                        }
+                    }),
+                }));
+            }
+        } else {
+            console.error('Invalid data: name, value, or kriteria may be undefined');
+        }
+    };
 
     const fetchByLabelSayuran = async (label: string) => {
         try {
@@ -202,6 +241,27 @@ const ClassifyPemeriksaan = ({
         loadData();
     }, []);
 
+    const findNik = (nik: number) => {
+        // mencari data pasien berdasarkan nik
+        const pasien = axios.get(route('api.get.pasien-by-nik', { nik: nik }));
+        if (pasien) {
+            pasien
+                .then((res) => {
+                    const data = res.data;
+                    setData((prev) => ({
+                        ...prev,
+                        nama: data.nama,
+                        tempat_lahir: data.tempat_lahir,
+                        tanggal_lahir: data.tanggal_lahir,
+                        jenis_kelamin: data.jenis_kelamin,
+                        alamat: data.alamat,
+                    }));
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    };
     const handlePredict = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -225,6 +285,13 @@ const ClassifyPemeriksaan = ({
                 if (lowerItem === 'laki-laki') {
                     return 0;
                 } else if (lowerItem === 'perempuan') {
+                    return 1;
+                }
+                if (lowerItem === 'kurang') {
+                    return 0;
+                } else if (lowerItem === 'sedang') {
+                    return 1;
+                } else if (lowerItem === 'baik') {
                     return 1;
                 } else if (!isNaN(parseFloat(nilai)) && isFinite(nilai)) {
                     return parseFloat(nilai); // ubah ke angka
@@ -258,9 +325,8 @@ const ClassifyPemeriksaan = ({
                     }
                     if (result.label !== undefined && result.label !== null) {
                         const newLabel = result.label.toString();
-                        console.log('Setting label to:', newLabel);
                         setData((prevData) => ({ ...prevData, label: newLabel }));
-                        console.log('Data after set (may not be updated yet):', data);
+
                         setResult(result);
                         fetchByLabelSayuran(result.label?.toString() ?? '');
                         handleOpenDialog();
@@ -335,11 +401,11 @@ const ClassifyPemeriksaan = ({
     const predictionColor = useMemo(() => {
         if (!prediction) return '';
         switch (prediction.label) {
-            case 'Buruk':
+            case 'beresiko':
                 return 'bg-red-100 border-red-300 text-red-800';
-            case 'Cukup':
+            case 'gizi buruk':
                 return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-            case 'Baik':
+            case 'gizi normal':
                 return 'bg-green-100 border-green-300 text-green-800';
             default:
                 return 'bg-blue-100 border-blue-300 text-blue-800';
@@ -354,209 +420,303 @@ const ClassifyPemeriksaan = ({
     };
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-8">
-            <Toast
-                open={toast.show}
-                onOpenChange={() => setToast((prev) => ({ ...prev, show: false }))}
-                title={toast.title}
-                description={toast.message}
-                duration={10000}
-                variant={toast.type}
-            />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-8">
+            <div className="mx-auto max-w-4xl">
+                {/* Toast Notification */}
+                <Toast
+                    open={toast.show}
+                    onOpenChange={() => setToast((prev) => ({ ...prev, show: false }))}
+                    title={toast.title}
+                    description={toast.message}
+                    duration={10000}
+                    variant={toast.type}
+                />
 
-            <div className="grid grid-cols-1 rounded-xl border border-gray-100 bg-white shadow-sm">
-                <div className="p-6 ring-1 md:p-8">
-                    <form onSubmit={(e) => handlePredict(e)} className="space-y-6">
-                        <div className="mt-4 grid grid-cols-2 gap-3">
-                            <div className="grid flex-1 gap-2">
-                                <Label htmlFor="nik">NIK</Label>
-                                <div className="flex">
-                                    <Input
-                                        id="nik"
-                                        type="text"
-                                        required
-                                        autoFocus
-                                        tabIndex={1}
-                                        autoComplete="nik"
-                                        value={nikPasien}
-                                        onChange={(e) => {
-                                            setData((prev) => ({ ...prev, nik: e.target.value }));
-                                            setNikPasien(e.target.value);
-                                        }}
-                                        disabled={processing}
-                                        placeholder="Masukkan Nik Pasien"
-                                    />
-                                </div>
-                                <InputError message={errors.nik} className="mt-2" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="nama">Nama Pasien</Label>
-                                <Input
-                                    id="nama"
-                                    type="text"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="nama"
-                                    value={data.nama}
-                                    onChange={(e) => setData({ ...data, nama: e.target.value })}
-                                    disabled={processing}
-                                    placeholder="Nama Pasien"
-                                />
-                                <InputError message={errors.nama} className="mt-2" />
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <div className="col-span-1 grid gap-2">
-                                    <Label htmlFor="tempat_lahir">Tempat</Label>
-                                    <Input
-                                        id="tempat_lahir"
-                                        type="text"
-                                        required
-                                        tabIndex={2}
-                                        autoComplete="tempat_lahir"
-                                        value={data.tempat_lahir}
-                                        onChange={(e) => setData({ ...data, tempat_lahir: e.target.value })}
-                                        disabled={processing}
-                                        placeholder="tempat_lahir......."
-                                    />
-                                    <InputError message={errors.tempat_lahir} />
-                                </div>
-                                <div className="col-span-2 grid gap-2">
-                                    <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
-                                    <Input
-                                        id="tanggal_lahir"
-                                        type="date"
-                                        required
-                                        // max={minDate}
-                                        tabIndex={2}
-                                        autoComplete="tanggal_lahir"
-                                        value={data.tanggal_lahir}
-                                        onChange={(e) => handleTanggalLahirChange(e)}
-                                        disabled={processing}
-                                        placeholder="tanggal lahir......."
-                                    />
-                                    <InputError message={errors.tanggal_lahir} />
-                                </div>
-                            </div>
+                {/* Header */}
+                <div className="mb-8 text-center">
+                    <div className="inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 shadow-sm">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                            <LeafyGreen className="h-5 w-5 text-green-600" />
                         </div>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            {kriteria.map((item, index) => {
-                                const value = data.kriteria?.[index]?.nilai ?? '';
+                        <h1 className="text-xl font-bold text-slate-800">Deteksi Status Gizi Ibu Hamil</h1>
+                    </div>
+                    <p className="mt-3 text-slate-600">Sistem prediksi status gizi menggunakan metode SVM</p>
+                </div>
 
-                                return (
-                                    <div key={index} className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700">
-                                            {item.nama.charAt(0).toUpperCase() + item.nama.slice(1)}
+                {/* Main Form Card */}
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
+                        <h2 className="text-lg font-semibold">Data Pasien</h2>
+                        <p className="text-sm opacity-90">Lengkapi informasi di bawah untuk analisis gizi</p>
+                    </div>
+
+                    <div className="p-6 md:p-8">
+                        <form onSubmit={(e) => handlePredict(e)} className="space-y-6">
+                            {/* Patient Identity Section */}
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    {/* NIK Input */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="nik" className="flex items-center gap-2">
+                                            <User className="h-4 w-4 text-slate-500" />
+                                            NIK Pasien
                                         </Label>
-                                        {item.nama.toLowerCase() === 'jenis kelamin' ? (
-                                            <Select
-                                                value={data.kriteria?.[index]?.nilai || ''}
-                                                required={true}
-                                                onValueChange={(val) => {
-                                                    setData((prev) => ({
-                                                        ...prev,
-                                                        jenis_kelamin: val,
-                                                        kriteria: prev.kriteria?.map((item, i) => (i === index ? { ...item, nilai: val } : item)),
-                                                    }));
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    id="nik"
+                                                    type="text"
+                                                    required
+                                                    tabIndex={1}
+                                                    autoComplete="nik"
+                                                    value={nikPasien}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        // Hanya izinkan angka
+                                                        if (/^\d*$/.test(value)) {
+                                                            if (value.length <= 16) {
+                                                                setData((prev) => ({ ...prev, nik: value }));
+                                                                setNikPasien(value);
+                                                            }
+                                                        }
+                                                    }}
+                                                    disabled={processing}
+                                                    placeholder="Masukkan NIK Pasien"
+                                                    className="pl-10"
+                                                />
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                                    <User className="h-4 w-4 text-slate-400" />
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant={'outline'}
+                                                onClick={() => {
+                                                    if (nikPasien.length <= 16) {
+                                                        findNik(Number(nikPasien));
+                                                    } else {
+                                                        setToast({
+                                                            title: 'Error',
+                                                            show: true,
+                                                            message: 'NIK harus 16 digit',
+                                                            type: 'error',
+                                                        });
+                                                    }
                                                 }}
                                             >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select Jenis Kelamin" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {['Laki-laki', 'Perempuan'].map((gender, idx) => (
-                                                        <SelectItem key={idx} value={gender}>
-                                                            {gender}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name={`kriteria.${index}`}
-                                                value={value}
-                                                onChange={handleChange}
-                                                placeholder={`Enter ${item.nama}`}
-                                                disabled={processing}
-                                                readOnly={item.nama.toLowerCase().includes('imt') || item.nama.toLowerCase().includes('umur')}
-                                                required
-                                            />
-                                        )}
+                                                Cari
+                                            </Button>
+                                        </div>
+                                        <InputError message={errors.nik} className="mt-2" />
                                     </div>
-                                );
-                            })}
-                        </div>
-                        <div className="flex w-full flex-wrap gap-3 pt-4">
-                            <Button
-                                type="submit"
-                                disabled={loading || !model || isError}
-                                className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
-                            >
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                Proses
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogTrigger />
-                <DialogContent className="h-auto max-w-7xl overflow-y-auto">
-                    <DialogTitle>
-                        <div className="flex items-center gap-3 text-foreground">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10">
-                                <LeafyGreen className={`h-4 w-4 ${prediction?.label == 'Baik' ? 'text-green-500' : 'text-red-500'}`} />
-                            </div>
-                            <span className="text-lg font-medium">Hasil rekomendasi sayuran</span>
-                        </div>
-                    </DialogTitle>
 
-                    <div className="mt-4 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Nama Gizi</p>
-                                <p className="text-sm font-medium">{data.nama}</p>
+                                    {/* Nama Input */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="nama" className="flex items-center gap-2">
+                                            <PersonStandingIcon className="h-4 w-4 text-slate-500" />
+                                            Nama Pasien
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="nama"
+                                                type="text"
+                                                required
+                                                tabIndex={1}
+                                                autoComplete="nama"
+                                                value={data.nama}
+                                                onChange={(e) => setData({ ...data, nama: e.target.value })}
+                                                disabled={processing}
+                                                placeholder="Nama Lengkap Pasien"
+                                                className="pl-10"
+                                            />
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                                <PersonStandingIcon className="h-4 w-4 text-slate-400" />
+                                            </div>
+                                        </div>
+                                        <InputError message={errors.nama} className="mt-2" />
+                                    </div>
+                                </div>
+
+                                {/* Birth Information */}
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tempat_lahir" className="flex items-center gap-2">
+                                            <MapPin className="h-4 w-4 text-slate-500" />
+                                            Tempat Lahir
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="tempat_lahir"
+                                                type="text"
+                                                required
+                                                tabIndex={2}
+                                                autoComplete="tempat_lahir"
+                                                value={data.tempat_lahir}
+                                                onChange={(e) => setData({ ...data, tempat_lahir: e.target.value })}
+                                                disabled={processing}
+                                                placeholder="Kota tempat lahir"
+                                                className="pl-10"
+                                            />
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                                <MapPin className="h-4 w-4 text-slate-400" />
+                                            </div>
+                                        </div>
+                                        <InputError message={errors.tempat_lahir} />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tanggal_lahir" className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-slate-500" />
+                                            Tanggal Lahir
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="tanggal_lahir"
+                                                type="date"
+                                                required
+                                                tabIndex={2}
+                                                autoComplete="tanggal_lahir"
+                                                value={data.tanggal_lahir}
+                                                onChange={(e) => handleTanggalLahirChange(e)}
+                                                disabled={processing}
+                                                className="pl-10"
+                                            />
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                                <Calendar className="h-4 w-4 text-slate-400" />
+                                            </div>
+                                        </div>
+                                        <InputError message={errors.tanggal_lahir} />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Tanggal Lahir</p>
-                                <p className="text-sm font-medium">{data.tanggal_lahir}</p>
-                            </div>
+                            {/* Criteria Form */}
+                            <FormLoopKriteria
+                                kriteria={kriteria}
+                                data={data}
+                                setData={setData}
+                                handleChange={handleChange}
+                                handleSelectChange={handleSelectChange}
+                                processing={processing}
+                            />
 
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Usia</p>
-                                <p className="text-sm font-medium">{hitungUsia(data.tanggal_lahir)}</p>
-                            </div>
-
-                            <div className="space-y-1">
-                                <p className={'text-sm font-medium text-muted-foreground ' + predictionColor}>status IMT</p>
-                                <p
-                                    className={`h-auto w-max flex-shrink-0 rounded-full px-2 ${
-                                        prediction?.label === 'Buruk'
-                                            ? 'bg-red-500'
-                                            : prediction?.label === 'Cukup'
-                                              ? 'bg-yellow-500'
-                                              : prediction?.label === 'Baik'
-                                                ? 'bg-green-500'
-                                                : 'bg-blue-500'
-                                    }`}
+                            {/* Submit Button */}
+                            <div className="pt-4">
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !model || isError}
+                                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-3 font-medium text-white shadow-md transition-all hover:from-green-700 hover:to-emerald-700 hover:shadow-lg disabled:opacity-50"
                                 >
-                                    {prediction?.label}
-                                </p>
+                                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
+                                    {loading ? 'Memproses...' : 'Analisis Status Gizi'}
+                                </Button>
                             </div>
-                            <div className="col-span-full">
+                        </form>
+                    </div>
+                </div>
+
+                {/* Results Dialog */}
+                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                    <DialogTrigger />
+                    <DialogContent className="max-w-4xl overflow-hidden rounded-2xl p-0">
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                            <DialogTitle className="flex items-center gap-3 text-white">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                                    <LeafyGreen className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold">Hasil Analisis Status Gizi</h2>
+                                    <p className="text-sm opacity-90">Rekomendasi berdasarkan kondisi kesehatan</p>
+                                </div>
+                            </DialogTitle>
+                        </div>
+
+                        <div className="max-h-[70vh] overflow-y-auto p-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                {/* Patient Information */}
+                                <div className="space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                                    <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
+                                        <User className="h-5 w-5 text-slate-600" />
+                                        Informasi Pasien
+                                    </h3>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between border-b border-slate-200 pb-2">
+                                            <span className="text-slate-600">Nama</span>
+                                            <span className="font-medium">{data.nama || '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 pb-2">
+                                            <span className="text-slate-600">Tanggal Lahir</span>
+                                            <span className="font-medium">{data.tanggal_lahir || '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 pb-2">
+                                            <span className="text-slate-600">Usia</span>
+                                            <span className="font-medium">{hitungUsia(data.tanggal_lahir)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-600">Tempat Lahir</span>
+                                            <span className="font-medium">{data.tempat_lahir || '-'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Nutrition Status */}
+                                <div className="space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                                    <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
+                                        <Scale className="h-5 w-5 text-slate-600" />
+                                        Status Gizi
+                                    </h3>
+
+                                    <div className="flex flex-col items-center justify-center space-y-4 py-2">
+                                        <div
+                                            className={`rounded-full p-1 ${prediction?.label === 'beresiko' ? 'bg-red-100' : prediction?.label === 'gizi buruk' ? 'bg-yellow-100' : prediction?.label === 'gizi normal' ? 'bg-green-100' : 'bg-blue-100'}`}
+                                        >
+                                            <div
+                                                className={`flex h-24 w-24 items-center justify-center rounded-full ${prediction?.label === 'beresiko' ? 'bg-red-500' : prediction?.label === 'gizi buruk' ? 'bg-yellow-500' : prediction?.label === 'gizi normal' ? 'bg-green-500' : 'bg-blue-500'}`}
+                                            >
+                                                {prediction?.label === 'gizi normal' ? (
+                                                    <CheckCircle className="h-10 w-10 text-white" />
+                                                ) : (
+                                                    <AlertCircle className="h-10 w-10 text-white" />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <p className="text-sm font-medium text-slate-600">Status IMT</p>
+                                            <p className={`rounded-2xl p-2 text-xl font-bold ${predictionColor}`}>{prediction?.label || '-'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nutrition Table */}
+                            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
+                                    <Heart className="h-5 w-5 text-slate-600" />
+                                    Rekomendasi Gizi
+                                </h3>
                                 <TableLabelSayuran data={data.statusGizi} />
                             </div>
+
+                            {/* Action Button */}
+                            <div className="mt-6">
+                                <Button
+                                    type="button"
+                                    variant="default"
+                                    size="sm"
+                                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-3 font-medium text-white shadow-md transition-all hover:from-green-700 hover:to-emerald-700 hover:shadow-lg"
+                                    disabled={processing}
+                                    onClick={submit}
+                                >
+                                    {processing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                                    {processing ? 'Menyimpan...' : 'Simpan Hasil Analisis'}
+                                </Button>
+                            </div>
                         </div>
-                        <Button type="button" variant="default" size="sm" className="w-full" disabled={processing} onClick={submit}>
-                            {processing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Simpan
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
     );
 };

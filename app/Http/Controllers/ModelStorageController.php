@@ -48,6 +48,25 @@ class ModelStorageController extends Controller
             ]
         ]);
     }
+    public function sample(Request $request)
+    {
+        // Handle the request to display the Support Vector Machine model index page
+        // dd($this->getData());
+        return Inertia::render('ModelStorage/sample', [
+            'dataTraining' => $this->getData(),
+            "kriteria" => Kriteria::all(),
+            "jenisTanaman" => JenisTanaman::all(),
+            "opsiLabel" => Label::orderBy('id', 'desc')->get(),
+            'breadcrumb' => self::BASE_BREADCRUMB,
+            'titlePage' => 'ModelStorage',
+            'can' => [
+                'add' => true,
+                'edit' => true,
+                'show' => true,
+                'delete' => true,
+            ]
+        ]);
+    }
     public function getData()
     {
         // Logic to retrieve data for the Support Vector Machine model

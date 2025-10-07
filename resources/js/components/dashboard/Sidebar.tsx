@@ -66,8 +66,14 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
                 {
                     name: 'Algoritma Support Vector Machine',
                     icon: <Code size={20} />,
-                    href: route('ModelStorageindex'),
+                    href: route('ModelStorage.index'),
                     active: 'model-storage',
+                },
+                {
+                    name: 'Algoritma Sample',
+                    icon: <Code size={20} />,
+                    href: route('ModelStorage.sample'),
+                    active: 'model-storage/s',
                 },
             ],
         },
@@ -200,7 +206,7 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
                                     ) : (
                                         // Item biasa (tanpa dropdown)
                                         <Link
-                                            href={item.href}
+                                            href={item.href as string}
                                             className={cn('flex items-center', item.active == activeSection ? 'text-primary' : 'text-white')}
                                         >
                                             <Tooltip>

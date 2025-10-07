@@ -146,9 +146,10 @@ Route::middleware(['auth', 'verified', 'role:admin|super_admin'])->group(functio
         });
     });
     // Route for decision tree model
-    Route::group(['prefix' => 'model-storage', 'as' => 'ModelStorage'], function () {
+    Route::group(['prefix' => 'model-storage', 'as' => 'ModelStorage.'], function () {
         Route::controller(ModelStorageController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/sample', 'sample')->name('sample');
         });
     });
 });

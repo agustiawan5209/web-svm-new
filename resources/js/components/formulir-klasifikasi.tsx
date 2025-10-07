@@ -69,7 +69,7 @@ interface EvaluationResult {
     confusionMatrix: number[][];
 }
 
-const ClassifyPemeriksaan = ({
+const FormKlasifikasi = ({
     data,
     setData,
     processing,
@@ -225,6 +225,7 @@ const ClassifyPemeriksaan = ({
             try {
                 const data = await model.fetchAndProcessData();
                 await model.loadModel();
+                console.log(data);
                 setTrainingData(data as any);
             } catch (error) {
                 setToast({
@@ -308,26 +309,39 @@ const ClassifyPemeriksaan = ({
                     type: 'error',
                 });
             } else {
-                const result = await model.predict([feature ?? []]);
+                const dataToSend = {
+                    trainingData: trainingData?.features,
+                    className: trainingData?.labelsY,
+                    inputFeature: feature,
+                };
+                const response = await axios.post('http://127.0.0.1:9000/api/svm/', dataToSend);
+                const label = trainingData?.label.find((item, index) => item.id === response.data.result);
 
-                if (result.error) {
+                const result = label?.nama;
+
+                if (response.data.status !== 'success') {
                     setToast({
                         title: 'Hasil Prediksi',
                         show: true,
-                        message: result.error as string,
-                        type: 'success',
+                        message: response.data.status as string,
+                        type: 'error',
                     });
                 } else {
-                    setPrediction(result);
+                    setPrediction({
+                        prediction: response.data.result,
+                        label: result ?? null,
+                        rekomendasi: label?.deskripsi ?? null,
+                        error: null,
+                    });
                     if (setFeature) {
                         setFeature(data.kriteria);
                     }
-                    if (result.label !== undefined && result.label !== null) {
-                        const newLabel = result.label.toString();
+                    if (result !== undefined && result !== null) {
+                        const newLabel = result.toString();
                         setData((prevData) => ({ ...prevData, label: newLabel }));
 
-                        setResult(result);
-                        fetchByLabelSayuran(result.label?.toString() ?? '');
+                        setResult({ prediction: response.data.result, label: result ?? null, rekomendasi: label?.deskripsi ?? null, error: null });
+                        fetchByLabelSayuran(result?.toString() ?? '');
                         handleOpenDialog();
                     }
                 }
@@ -344,12 +358,6 @@ const ClassifyPemeriksaan = ({
             setLoading(false);
         }
     };
-    useEffect(() => {
-        if (prediction && prediction.label) {
-            console.log('Prediction label changed:', prediction.label);
-            setData('label', prediction.label.toString());
-        }
-    }, [prediction]);
 
     const handleOpenDialog = () => {
         setOpenDialog(true);
@@ -720,4 +728,4 @@ const ClassifyPemeriksaan = ({
     );
 };
 
-export default ClassifyPemeriksaan;
+export default FormKlasifikasi;

@@ -33,6 +33,12 @@ interface ModelOptions {
     kernel: 'linear' | 'rbf';
     C: number;
     gamma: number;
+    learningRate?: number;
+    batchSize?: number;
+    epochs?: number;
+    hiddenUnits?: number[];
+    dropoutRate?: number;
+    useBatchNorm?: boolean;
 }
 
 interface OperationState<T = any> {
@@ -205,7 +211,7 @@ class SVMModel {
             };
 
             this.trainingData = trainingData;
-            this.splitData = this.splitDataTraining(features, labelsY, 0.8);
+            this.splitData = this.splitDataTraining(features, labelsY, 0.7);
 
             this.setState('dataLoading', {
                 isLoading: false,
@@ -220,6 +226,37 @@ class SVMModel {
             });
             throw new Error(errorMsg);
         }
+    }
+    // Normalisasi z-score (mean=0, std=1) untuk features
+    private normalizeFeatures(features: number[][], mean: number[], std: number[]): number[][] {
+        return features.map(
+            (row) => row.map((val, idx) => (val - mean[idx]) / (std[idx] || 1)), // Hindari div by 0
+        );
+    }
+
+    // Hitung mean dan std per feature dari train data
+    private computeNormalizerStats(features: number[][]): { mean: number[]; std: number[] } {
+        const numFeatures = features[0].length;
+        const mean: number[] = new Array(numFeatures).fill(0);
+        const variance: number[] = new Array(numFeatures).fill(0);
+        const n = features.length;
+
+        // Hitung mean
+        for (const row of features) {
+            for (let i = 0; i < numFeatures; i++) {
+                mean[i] += row[i] / n;
+            }
+        }
+
+        // Hitung variance
+        for (const row of features) {
+            for (let i = 0; i < numFeatures; i++) {
+                variance[i] += Math.pow(row[i] - mean[i], 2) / n;
+            }
+        }
+
+        const std = variance.map((v) => Math.sqrt(v + 1e-8)); // Tambah epsilon untuk stabilitas
+        return { mean, std };
     }
 
     private splitDataTraining(features: number[][], labelsY: number[], splitRatio = 0.7): SplitData {
@@ -237,40 +274,34 @@ class SVMModel {
     private createSVMModel(inputDim: number, numClasses: number, options: ModelOptions): tf.LayersModel {
         const model = tf.sequential();
 
-        // Input layer dengan normalisasi
+        // Input layer
         model.add(
             tf.layers.dense({
                 inputShape: [inputDim],
-                units: 128,
-                activation: 'relu',
-                kernelRegularizer: tf.regularizers.l2({ l2: 1 / options.C }),
-            }),
-        );
-
-        // Dropout untuk regularisasi
-        model.add(tf.layers.dropout({ rate: 0.3 }));
-
-        // Hidden layer
-        model.add(
-            tf.layers.dense({
-                units: 64,
+                units: options.hiddenUnits?.[0] || 128, // Buat configurable, e.g., [128, 64, 32]
                 activation: 'relu',
             }),
         );
-
-        // Output layer untuk multi-class classification
-        model.add(
-            tf.layers.dense({
-                units: numClasses,
-                activation: 'softmax',
-            }),
-        );
-
-        // Compile model dengan optimizer yang sesuai
+        if (options.useBatchNorm !== false) model.add(tf.layers.batchNormalization());
+        model.add(tf.layers.dropout({ rate: options.dropoutRate || 0.3 }));
+        // Hidden layers (loop jika multiple)
+        const hiddenUnits = options.hiddenUnits?.slice(1) || [64];
+        hiddenUnits.forEach((units, i) => {
+            model.add(tf.layers.dense({ units, activation: 'relu' }));
+            if (options.useBatchNorm !== false) model.add(tf.layers.batchNormalization());
+            model.add(tf.layers.dropout({ rate: options.dropoutRate || 0.2 }));
+        });
+        // Output
+        model.add(tf.layers.dense({ units: numClasses, activation: 'softmax' }));
+        // Compile dengan options
+        const lr = options.learningRate || 0.001;
+        const optimizer = tf.train.adam(lr);
         model.compile({
-            optimizer: tf.train.adam(0.001),
+            optimizer,
             loss: 'sparseCategoricalCrossentropy',
             metrics: ['accuracy'],
+            // Tambah class weights jika imbalanced
+            // weightedMetrics: options.classWeights,
         });
 
         return model;
@@ -444,6 +475,13 @@ class SVMModel {
     public async trainModel(options?: Partial<ModelOptions>, callbacks?: TrainingCallbacks): Promise<void> {
         this.setState('training', { isLoading: true, error: null });
 
+        let trainFeaturesTensor: tf.Tensor | null = null;
+        let trainLabelsTensor: tf.Tensor | null = null;
+        let normalizedFeatures: tf.Tensor | null = null;
+        let mean: tf.Tensor | null = null;
+        let variance: tf.Tensor | null = null;
+        let adjustedVariance: tf.Tensor | null = null;
+
         try {
             if (!this.trainingData || this.trainingData.features.length === 0) {
                 throw new Error('Training data tidak tersedia atau kosong');
@@ -456,28 +494,28 @@ class SVMModel {
                 ...options,
             };
 
-            // Prepare data dengan tipe yang benar
+            // Prepare data
             const numClasses = this.classNames.length;
-            const inputDim = this.trainingData.features[0].length;
+            const inputDim = this.splitData.trainFeatures[0].length;
 
             // Convert features to float32
-            const trainFeaturesTensor = tf.tensor2d(this.splitData.trainFeatures, undefined, 'float32');
-
-            // Convert labels to float32
-            const trainLabelsTensor = tf.tensor1d(this.splitData.trainLabelsY, 'float32');
+            trainFeaturesTensor = tf.tensor2d(this.splitData.trainFeatures, undefined, 'float32');
+            trainLabelsTensor = tf.tensor1d(this.splitData.trainLabelsY, 'float32');
 
             // Normalisasi features
-            const { mean, variance } = tf.moments(trainFeaturesTensor, 0);
-            const adjustedVariance = variance.add(1e-7);
-            const normalizedFeatures = trainFeaturesTensor.sub(mean).div(adjustedVariance.sqrt());
+            const moments = tf.moments(trainFeaturesTensor, 0);
+            mean = moments.mean;
+            variance = moments.variance;
+            adjustedVariance = variance.add(1e-7);
+            normalizedFeatures = trainFeaturesTensor.sub(mean).div(adjustedVariance.sqrt());
 
-            // Create and train model
+            // Create model
             this.svmModel = this.createSVMModel(inputDim, numClasses, defaultOptions);
 
             console.log('Memulai training model...');
             console.log(`Data: ${this.splitData.trainFeatures.length} samples, ${numClasses} classes`);
 
-            // Panggil callback awal training
+            // Callback awal training
             if (callbacks?.onTrainBegin) {
                 callbacks.onTrainBegin({
                     samples: this.splitData.trainFeatures.length,
@@ -486,22 +524,25 @@ class SVMModel {
                 });
             }
 
-            // Manual splitting untuk validation data
-            const splitIndex = Math.floor(this.splitData.trainFeatures.length * 0.8);
+            // FIX: Gunakan data yang berbeda untuk validation
+            // (Asumsi Anda punya validation data terpisah)
+            let valFeatures: tf.Tensor;
+            let valLabels: tf.Tensor;
+            // Jika ada validation data terpisah
+            valFeatures = tf.tensor2d(this.splitData.testFeatures, undefined, 'float32');
+            valLabels = tf.tensor1d(this.splitData.testLabelsY, 'float32');
 
-            const trainFeatures = normalizedFeatures.slice(0, splitIndex);
-            const trainLabels = trainLabelsTensor.slice(0, splitIndex);
-            const valFeatures = normalizedFeatures.slice(splitIndex);
-            const valLabels = trainLabelsTensor.slice(splitIndex);
+            // Normalisasi validation data dengan mean dan variance dari training data
+            const valNormalized = valFeatures.sub(mean).div(adjustedVariance.sqrt());
+            valFeatures = valNormalized;
 
-            // Training dengan callbacks
-            const history = await this.svmModel.fit(trainFeatures, trainLabels, {
+            // Training dengan callbacks yang diperbaiki
+            const history = await this.svmModel.fit(normalizedFeatures, trainLabelsTensor, {
                 epochs: 50,
                 batchSize: 32,
                 validationData: [valFeatures, valLabels],
                 callbacks: {
                     onEpochEnd: async (epoch, logs) => {
-                        // Panggil custom callback
                         if (callbacks?.onEpochEnd) {
                             callbacks.onEpochEnd(epoch, {
                                 loss: logs?.loss || 0,
@@ -511,31 +552,21 @@ class SVMModel {
                             });
                         }
                     },
-                    onTrainEnd: () => {
-                        console.log('Training completed');
-                        if (callbacks?.onTrainEnd) {
-                            callbacks.onTrainEnd({
-                                finalLoss: history.history.loss[history.history.loss.length - 1],
-                                finalAccuracy: history.history.acc[history.history.acc.length - 1],
-                            });
-                        }
-                    },
                 },
             });
 
-            console.log('Training selesai', this.svmModel);
+            console.log('Training selesai');
 
-            // Cleanup tensors
-            trainFeaturesTensor.dispose();
-            trainLabelsTensor.dispose();
-            normalizedFeatures.dispose();
-            mean.dispose();
-            variance.dispose();
-            adjustedVariance.dispose();
-            trainFeatures.dispose();
-            trainLabels.dispose();
-            valFeatures.dispose();
-            valLabels.dispose();
+            // FIX: Callback onTrainEnd yang aman
+            if (callbacks?.onTrainEnd) {
+                const finalLoss = history.history.loss && history.history.loss.length > 0 ? history.history.loss[history.history.loss.length - 1] : 0;
+                const finalAccuracy = history.history.acc && history.history.acc.length > 0 ? history.history.acc[history.history.acc.length - 1] : 0;
+
+                callbacks.onTrainEnd({
+                    finalLoss,
+                    finalAccuracy,
+                });
+            }
 
             this.setState('training', { isLoading: false });
         } catch (err) {
@@ -546,6 +577,14 @@ class SVMModel {
                 error: errorMsg,
             });
             throw new Error(errorMsg);
+        } finally {
+            // FIX: Cleanup yang aman di finally block
+            const tensors = [trainFeaturesTensor, trainLabelsTensor, normalizedFeatures, mean, variance, adjustedVariance];
+            tensors.forEach((tensor) => {
+                if (tensor && !tensor.isDisposed) {
+                    tensor.dispose();
+                }
+            });
         }
     }
     public async evaluateModel(): Promise<{ accuracy: number; confusionMatrix: number[][] }> {
@@ -633,24 +672,7 @@ class SVMModel {
             rekomendasi: rekomendasi ?? '',
         };
     }
-    private calculateDetailedConfidence = (predictions: any) => {
-        const results = [];
 
-        // Untuk setiap prediksi
-        for (let i = 0; i < predictions.shape[0]; i++) {
-            const probs = predictions.slice([i, 0], [1, -1]).dataSync();
-            const maxProb = Math.max(...probs);
-            const predictedClass = probs.indexOf(maxProb);
-
-            results.push({
-                predictedClass: predictedClass,
-                confidence: Math.round(maxProb * 100),
-                allProbabilities: Array.from(probs).map((p) => Math.round(p * 100)),
-            });
-        }
-
-        return results;
-    };
     public async predict(features: number[] | number[][]): Promise<PredictionResult> {
         this.setState('prediction', { isLoading: true, error: null });
 
@@ -685,7 +707,6 @@ class SVMModel {
             });
 
             const label = labelNames.length === 1 ? labelNames[0] : labelNames;
-            const rekomendasi = await this.getsayuran(label as string);
 
             // Cleanup tensors
             featuresTensor.dispose();
@@ -696,7 +717,7 @@ class SVMModel {
             const result: PredictionResult = {
                 prediction: predictionsArray.length === 1 ? predictionsArray[0] : predictionsArray,
                 label: label,
-                rekomendasi: rekomendasi.rekomendasi,
+                rekomendasi: null,
                 error: null,
             };
 
@@ -715,7 +736,6 @@ class SVMModel {
             throw new Error(errorMsg);
         }
     }
-
     // Cleanup method to dispose tensors and models
     public dispose(): void {
         if (this.svmModel) {

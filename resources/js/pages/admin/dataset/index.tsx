@@ -155,7 +155,7 @@ export default function IndikatorIndex({ dataset, kriteria, breadcrumb, titlePag
                                 className="flex cursor-pointer items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:from-blue-700 hover:to-purple-700"
                             >
                                 <Plus className="h-5 w-5" />
-                                Data Pasien Baru
+                                Dataset Baru
                             </Button>
                         </Link>
                     </div>

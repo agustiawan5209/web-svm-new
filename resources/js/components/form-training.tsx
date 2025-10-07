@@ -281,6 +281,12 @@ const FormTraining = ({
                     return 0;
                 } else if (lowerItem === 'perempuan') {
                     return 1;
+                } else if (lowerItem === 'kurang') {
+                    return 0;
+                } else if (lowerItem === 'sedang') {
+                    return 1;
+                } else if (lowerItem === 'baik') {
+                    return 2;
                 } else if (!isNaN(parseFloat(item)) && isFinite(item)) {
                     return parseFloat(item); // ubah ke angka
                 } else {
@@ -337,20 +343,15 @@ const FormTraining = ({
         );
     }, [evaluationResult]);
 
-    const dataState = model.getDataLoadingState();
-    const trainingState = model.getTrainingState();
-    const evalState = model.getEvaluationState();
-    const predState = model.getPredictionState();
-
     // Determine prediction color
     const predictionColor = useMemo(() => {
         if (!prediction) return '';
         switch (prediction.label) {
-            case 'Buruk':
+            case 'beresiko':
                 return 'bg-red-100 border-red-300 text-red-800';
-            case 'Cukup':
+            case 'gizi buruk':
                 return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-            case 'Baik':
+            case 'gizi normal':
                 return 'bg-green-100 border-green-300 text-green-800';
             default:
                 return 'bg-blue-100 border-blue-300 text-blue-800';
@@ -633,11 +634,11 @@ const FormTraining = ({
                                 animate={{ scale: [1, 1.2, 1] }}
                                 transition={{ duration: 2, repeat: Infinity }}
                                 className={`h-5 w-5 flex-shrink-0 rounded-full ${
-                                    prediction?.label === 'Buruk'
+                                    prediction?.label === 'beresiko'
                                         ? 'bg-red-500'
-                                        : prediction?.label === 'Cukup'
+                                        : prediction?.label === 'gizi buruk'
                                           ? 'bg-yellow-500'
-                                          : prediction?.label === 'Baik'
+                                          : prediction?.label === 'gizi normal'
                                             ? 'bg-green-500'
                                             : 'bg-blue-500'
                                 }`}

@@ -1,4 +1,4 @@
-import ClassifyPemeriksaan from '@/components/classify-pemeriksaan';
+import FormKlasifikasi from '@/components/formulir-klasifikasi';
 import { Card, CardContent } from '@/components/ui/card';
 import { Toast } from '@/components/ui/toast';
 import AppLayout from '@/layouts/app-layout';
@@ -115,7 +115,7 @@ export default function PemeriksaanCreate({ breadcrumb, kriteria }: PemeriksaanC
                         <CardContent>
                             {kriteria && (
                                 <div className="mt-6">
-                                    <ClassifyPemeriksaan
+                                    <FormKlasifikasi
                                         submit={submit}
                                         kriteria={kriteria}
                                         setResult={setPrediction}

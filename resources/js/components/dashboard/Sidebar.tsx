@@ -14,7 +14,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Clock8,
-    Code,
+    CopyIcon,
     FolderClockIcon,
     GalleryHorizontal,
     Home,
@@ -47,8 +47,18 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
 
     const navItems = [
         { name: 'Dashboard', icon: <Home size={20} />, href: route('dashboard'), active: 'dashboard' },
-        { name: 'Kriteria', icon: <BarChart2Icon size={20} />, href: route('admin.kriteria.index'), active: 'kriterias' },
-        { name: 'Data Pasien', icon: <Users2 size={20} />, href: route('pasien.index'), active: 'pasien' },
+
+        // Parent item dengan nested dropdown
+        {
+            name: 'Master Data',
+            icon: <CopyIcon size={20} />,
+            active: ['kriterias', 'pasien'],
+            hasChildren: true,
+            children: [
+                { name: 'Kriteria', icon: <BarChart2Icon size={20} />, href: route('admin.kriteria.index'), active: 'kriterias' },
+                { name: 'Data Pasien', icon: <Users2 size={20} />, href: route('pasien.index'), active: 'pasien' },
+            ],
+        },
 
         // Parent item dengan nested dropdown
         {
@@ -58,23 +68,17 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
             hasChildren: true,
             children: [
                 {
-                    name: 'Training Data Gizi',
+                    name: 'Dataset Gizi Ibu Hamil',
                     icon: <FolderClockIcon size={20} />,
                     href: route('admin.dataset.index'),
                     active: 'dataset',
                 },
-                {
-                    name: 'Algoritma Support Vector Machine',
-                    icon: <Code size={20} />,
-                    href: route('ModelStorage.index'),
-                    active: 'model-storage',
-                },
-                {
-                    name: 'Algoritma Sample',
-                    icon: <Code size={20} />,
-                    href: route('ModelStorage.sample'),
-                    active: 'model-storage/s',
-                },
+                // {
+                //     name: 'Algoritma Support Vector Machine',
+                //     icon: <Code size={20} />,
+                //     href: route('ModelStorage.index'),
+                //     active: 'model-storage',
+                // },
             ],
         },
 
@@ -155,7 +159,7 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
                                                                 <ChevronDown
                                                                     size={16}
                                                                     className={cn(
-                                                                        'text-muted-foreground transition-transform',
+                                                                        'text-background transition-transform',
                                                                         openDropdown === item.name ? 'rotate-180' : '',
                                                                     )}
                                                                 />

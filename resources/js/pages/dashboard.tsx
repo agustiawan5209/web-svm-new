@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { AlertCircle, ArrowUpRight, CalendarDays, Filter, Plus, UserRound, Weight } from 'lucide-react';
+import { AlertCircle, ArrowUpRight, CalendarDays, UserRound, Weight } from 'lucide-react';
 
 interface NutritionStatus {
     status: 'baik' | 'kurang' | 'berisiko';
@@ -110,16 +110,6 @@ const NutritionSummary = ({
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800">Ringkasan Gizi</h1>
                         <p className="text-gray-500">Pantau status gizi ibu hamil</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                            <Filter className="mr-2 h-4 w-4" />
-                            Filter
-                        </Button>
-                        <Button size="sm">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Tambah Pasien
-                        </Button>
                     </div>
                 </div>
 

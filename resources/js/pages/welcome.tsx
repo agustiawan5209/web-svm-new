@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Link } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 
 const Home = () => {
+    const { auth } = usePage<SharedData>().props;
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
             {/* Header */}
@@ -35,11 +37,19 @@ const Home = () => {
                             Kontak
                         </a>
                     </nav>
-                    <Link href="/login">
-                        <Button variant="outline" className="hidden border-teal-500 text-teal-500 hover:bg-teal-50 md:inline-flex">
-                            Login
-                        </Button>
-                    </Link>
+                    {auth.user ? (
+                        <Link href={route('guest.dashboard')}>
+                            <Button variant="outline" className="hidden border-teal-500 text-teal-500 hover:bg-teal-50 md:inline-flex">
+                                Login
+                            </Button>
+                        </Link>
+                    ) : (
+                        <Link href="/login">
+                            <Button variant="outline" className="hidden border-teal-500 text-teal-500 hover:bg-teal-50 md:inline-flex">
+                                Login
+                            </Button>
+                        </Link>
+                    )}
                     <button className="text-gray-600 md:hidden">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

@@ -5,9 +5,7 @@ export default function UserAuthLayout({ children }: PropsWithChildren) {
     return (
         <MainLayout>
             {/* Hero Section */}
-            <main className='py-8'>
-                {children}
-            </main>
+            <main className="py-4">{children}</main>
         </MainLayout>
     );
 }

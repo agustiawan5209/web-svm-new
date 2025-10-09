@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Label;
+use App\Models\Pasien;
 use App\Models\Kriteria;
 use App\Models\Pemeriksaan;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class KlasifikasiController extends Controller
         // Apply filters
         $this->applyFilters($pemeriksaanQuery, $request);
 
-        $pemeriksaan = $pemeriksaanQuery->orderBy('id', 'desc')->get();
+        $pemeriksaan = $pemeriksaanQuery->orderBy('id', 'desc')->paginate(10);
 
         return Inertia::render('guest/pemeriksaan/index', [
             'pemeriksaan' => $pemeriksaan,
@@ -99,7 +100,7 @@ class KlasifikasiController extends Controller
             'kriteria' => Kriteria::orderBy('id')
                 ->whereNotIn('nama', ['status'])
                 ->get(),
-            'pasien' => User::orderBy('id')->with(['user'])->get(),
+            'pasien' => Pasien::orderBy('id')->with(['user'])->get(),
             'label' => array_map(fn($label) => ['nama' => $label], $statusLabel),
             'breadcrumb' => array_merge(self::BASE_BREADCRUMB, [
                 [
@@ -118,12 +119,12 @@ class KlasifikasiController extends Controller
         try {
             $pasienData = $request->except('kriteria', 'tanggal_pemeriksaan');
 
-            $existingUserWithNama = User::where('nama', '=', $request->nama)->where('user_id', '=', $request->user_id)->first();
+            $existingUserWithNama = Pasien::where('nama', '=', $request->nama)->where('user_id', '=', $request->user_id)->first();
             if ($existingUserWithNama) {
                 $pasien = $existingUserWithNama;
             } else {
 
-                $pasien = User::create($pasienData);
+                $pasien = Pasien::create($pasienData);
             }
 
             $pemeriksaanData = [

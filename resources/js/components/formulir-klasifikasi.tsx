@@ -314,7 +314,7 @@ const FormKlasifikasi = ({
                     className: trainingData?.labelsY,
                     inputFeature: feature,
                 };
-                const response = await axios.post('http://delapain.my.id/api/svm/', dataToSend);
+                const response = await axios.post('https://delapain.my.id/api/svm/', dataToSend);
                 const label = trainingData?.label.find((item, index) => item.id === response.data.result);
 
                 const result = label?.nama;

@@ -23,8 +23,8 @@ class DashboardController extends Controller
         $distributionLabel = $this->setDistribusiLabel($training, $label);
 
         $pasien = Pasien::with(['pemeriksaan' => function ($query) {
-            $query->latest()->limit(1);
-        }])->latest()->take(5)->get()->map(function ($item) {
+            $query->latest()->limit(5);
+        }])->latest()->get()->map(function ($item) {
             $pemeriksaan = $item->pemeriksaan->first();
 
             $kriteria = Kriteria::all();

@@ -10,7 +10,7 @@ import { BreadcrumbItem } from '@/types';
 import { AlertCircle, ArrowUpRight, CalendarDays, UserRound, Weight } from 'lucide-react';
 
 interface NutritionStatus {
-    status: 'baik' | 'kurang' | 'berisiko';
+    status: 'normal' | 'buruk' | 'beresiko';
     color: string;
 }
 
@@ -35,7 +35,7 @@ const NutritionSummary = ({
             height: 160,
             pregnancyAge: 24,
             lastCheckup: '2023-06-15',
-            nutritionStatus: { status: 'baik', color: 'bg-green-500' },
+            nutritionStatus: { status: 'normal', color: 'bg-green-500' },
         },
         {
             id: '002',
@@ -45,7 +45,7 @@ const NutritionSummary = ({
             height: 155,
             pregnancyAge: 16,
             lastCheckup: '2023-06-12',
-            nutritionStatus: { status: 'kurang', color: 'bg-amber-500' },
+            nutritionStatus: { status: 'buruk', color: 'bg-amber-500' },
         },
         {
             id: '003',
@@ -55,7 +55,7 @@ const NutritionSummary = ({
             height: 158,
             pregnancyAge: 30,
             lastCheckup: '2023-06-10',
-            nutritionStatus: { status: 'berisiko', color: 'bg-red-500' },
+            nutritionStatus: { status: 'beresiko', color: 'bg-red-500' },
         },
         {
             id: '004',
@@ -65,7 +65,7 @@ const NutritionSummary = ({
             height: 162,
             pregnancyAge: 8,
             lastCheckup: '2023-06-08',
-            nutritionStatus: { status: 'baik', color: 'bg-green-500' },
+            nutritionStatus: { status: 'normal', color: 'bg-green-500' },
         },
         {
             id: '005',
@@ -75,7 +75,7 @@ const NutritionSummary = ({
             height: 165,
             pregnancyAge: 20,
             lastCheckup: '2023-06-05',
-            nutritionStatus: { status: 'baik', color: 'bg-green-500' },
+            nutritionStatus: { status: 'normal', color: 'bg-green-500' },
         },
     ],
 }: {
@@ -93,9 +93,9 @@ const NutritionSummary = ({
     );
 
     const percentages = {
-        baik: Math.round(((statusCounts.baik || 0) / totalPatients) * 100),
-        kurang: Math.round(((statusCounts.kurang || 0) / totalPatients) * 100),
-        berisiko: Math.round(((statusCounts.berisiko || 0) / totalPatients) * 100),
+        normal: Math.round(((statusCounts.normal || 0) / totalPatients) * 100),
+        buruk: Math.round(((statusCounts.buruk || 0) / totalPatients) * 100),
+        beresiko: Math.round(((statusCounts.beresiko || 0) / totalPatients) * 100),
     };
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -145,7 +145,7 @@ const NutritionSummary = ({
                         <CardContent>
                             <div className="flex items-center">
                                 <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
-                                <div className="text-2xl font-bold">{statusCounts.berisiko || 0}</div>
+                                <div className="text-2xl font-bold">{statusCounts.beresiko || 0}</div>
                             </div>
                         </CardContent>
                     </Card>
@@ -171,22 +171,23 @@ const NutritionSummary = ({
                                             <div className="mb-1 flex items-center justify-between">
                                                 <div className="flex items-center">
                                                     <div className="mr-2 h-3 w-3 rounded-full bg-green-500"></div>
-                                                    <span>Status Baik</span>
+                                                    <span>Status Normal</span>
                                                 </div>
-                                                <span className="font-medium">{percentages.baik}%</span>
+                                                <span className="font-medium">{percentages.normal}%</span>
                                             </div>
-                                            <Progress value={percentages.baik} className="h-2" />
+
+                                            <Progress value={Number(percentages.normal)} className="h-2" />
                                         </div>
 
                                         <div>
                                             <div className="mb-1 flex items-center justify-between">
                                                 <div className="flex items-center">
                                                     <div className="mr-2 h-3 w-3 rounded-full bg-amber-500"></div>
-                                                    <span>Status Kurang</span>
+                                                    <span>Status Buruk</span>
                                                 </div>
-                                                <span className="font-medium">{percentages.kurang}%</span>
+                                                <span className="font-medium">{percentages.buruk}%</span>
                                             </div>
-                                            <Progress value={percentages.kurang} className="h-2" />
+                                            <Progress value={percentages.buruk} className="h-2" />
                                         </div>
 
                                         <div>
@@ -195,9 +196,9 @@ const NutritionSummary = ({
                                                     <div className="mr-2 h-3 w-3 rounded-full bg-red-500"></div>
                                                     <span>Status Berisiko</span>
                                                 </div>
-                                                <span className="font-medium">{percentages.berisiko}%</span>
+                                                <span className="font-medium">{percentages.beresiko}%</span>
                                             </div>
-                                            <Progress value={percentages.berisiko} className="h-2" />
+                                            <Progress value={percentages.beresiko} className="h-2" />
                                         </div>
                                     </div>
 
@@ -209,7 +210,7 @@ const NutritionSummary = ({
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
-                                                        clipPath: `polygon(50% 50%, 50% 0%, ${50 + (50 * percentages.baik) / 100}% 0%)`,
+                                                        clipPath: `polygon(50% 50%, 50% 0%, ${50 + (50 * percentages.normal) / 100}% 0%)`,
                                                     }}
                                                 ></div>
                                                 <div
@@ -217,7 +218,7 @@ const NutritionSummary = ({
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
-                                                        clipPath: `polygon(50% 50%, ${50 + (50 * percentages.baik) / 100}% 0%, ${50 + (50 * (percentages.baik + percentages.kurang)) / 100}% ${50 - (50 * (percentages.baik + percentages.kurang)) / 100}%)`,
+                                                        clipPath: `polygon(50% 50%, ${50 + (50 * percentages.normal) / 100}% 0%, ${50 + (50 * (percentages.normal + percentages.buruk)) / 100}% ${50 - (50 * (percentages.normal + percentages.buruk)) / 100}%)`,
                                                     }}
                                                 ></div>
                                                 <div
@@ -225,7 +226,7 @@ const NutritionSummary = ({
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
-                                                        clipPath: `polygon(50% 50%, ${50 + (50 * (percentages.baik + percentages.kurang)) / 100}% ${50 - (50 * (percentages.baik + percentages.kurang)) / 100}%, 100% 50%)`,
+                                                        clipPath: `polygon(50% 50%, ${50 + (50 * (percentages.normal + percentages.buruk)) / 100}% ${50 - (50 * (percentages.normal + percentages.buruk)) / 100}%, 100% 50%)`,
                                                     }}
                                                 ></div>
                                             </div>
@@ -282,9 +283,9 @@ const NutritionSummary = ({
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="all">Semua Status</SelectItem>
-                                                <SelectItem value="baik">Status Baik</SelectItem>
-                                                <SelectItem value="kurang">Status Kurang</SelectItem>
-                                                <SelectItem value="berisiko">Status Berisiko</SelectItem>
+                                                <SelectItem value="normal">Status Normal</SelectItem>
+                                                <SelectItem value="buruk">Status Buruk</SelectItem>
+                                                <SelectItem value="beresiko">Status Berisiko</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -346,10 +347,10 @@ const NutritionSummary = ({
                         <CardDescription>Pasien yang memerlukan perhatian khusus</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {patients.filter((p) => p.nutritionStatus.status === 'berisiko').length > 0 ? (
+                        {patients.filter((p) => p.nutritionStatus.status === 'beresiko').length > 0 ? (
                             <div className="space-y-4">
                                 {patients
-                                    .filter((p) => p.nutritionStatus.status === 'berisiko')
+                                    .filter((p) => p.nutritionStatus.status === 'beresiko')
                                     .map((patient) => (
                                         <div
                                             key={patient.id}
@@ -360,7 +361,7 @@ const NutritionSummary = ({
                                                 <div>
                                                     <div className="font-medium">{patient.name} memerlukan perhatian khusus</div>
                                                     <div className="text-sm text-gray-600">
-                                                        Status gizi berisiko dengan berat {patient.weight} kg pada usia kehamilan{' '}
+                                                        Status gizi beresiko dengan berat {patient.weight} kg pada usia kehamilan{' '}
                                                         {patient.pregnancyAge} minggu
                                                     </div>
                                                 </div>
@@ -373,7 +374,7 @@ const NutritionSummary = ({
                             </div>
                         ) : (
                             <div className="flex items-center justify-center p-6 text-gray-500">
-                                Tidak ada notifikasi status gizi berisiko saat ini
+                                Tidak ada notifikasi status gizi beresiko saat ini
                             </div>
                         )}
                     </CardContent>

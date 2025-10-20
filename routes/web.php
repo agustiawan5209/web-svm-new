@@ -142,6 +142,7 @@ Route::middleware(['auth', 'verified', 'role:admin|super_admin'])->group(functio
             Route::controller(RiwayatKlasifikasiController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/{pemeriksaan}/show', 'show')->name('show');
+                Route::delete('/{pemeriksaan}/show', 'destroy')->name('destroy');
             });
         });
     });

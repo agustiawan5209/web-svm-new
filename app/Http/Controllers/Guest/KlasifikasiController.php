@@ -192,8 +192,6 @@ class KlasifikasiController extends Controller
     {
         $pemeriksaan->load([
             'pasien',
-            'pasien.pemeriksaan',
-            'pasien.pemeriksaan.detailpemeriksaan',
             'detailpemeriksaan',
             'detailpemeriksaan.kriteria',
         ]);

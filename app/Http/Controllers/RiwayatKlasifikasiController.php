@@ -37,7 +37,7 @@ class RiwayatKlasifikasiController extends Controller
     {
         $statusLabel = Label::pluck('nama')->toArray();
         $pemeriksaanQuery = Pemeriksaan::with([
-            'user',
+            'pasien',
             'detailpemeriksaan',
             'detailpemeriksaan.kriteria',
         ]);
@@ -91,16 +91,14 @@ class RiwayatKlasifikasiController extends Controller
     public function show(Pemeriksaan $pemeriksaan)
     {
         $pemeriksaan->load([
-            'user',
-            'pasienpemeriksaan',
-            'pasienpemeriksaan.detailpemeriksaan',
+            'pasien',
             'detailpemeriksaan',
             'detailpemeriksaan.kriteria',
         ]);
 
         return Inertia::render('admin/riwayat/show', [
             'pemeriksaan' => $pemeriksaan,
-            'user' => $pemeriksaan->user,
+            'pasien' => $pemeriksaan->pasien,
             'detail' => $pemeriksaan->detailpemeriksaan,
             'dataPemeriksaanPasien' => $pemeriksaan->user->pemeriksaan,
             'breadcrumb' => array_merge(self::BASE_BREADCRUMB, [
@@ -111,5 +109,12 @@ class RiwayatKlasifikasiController extends Controller
             ]),
             'kriteria' => Kriteria::orderBy('id', 'asc')->get(),
         ]);
+    }
+
+    public function destroy(Pemeriksaan $riwayat)
+    {
+        $riwayat->delete();
+
+        return redirect()->route('admin.riwayat.index')->with('success', 'Riwayat pemeriksaan berhasil dihapus.');
     }
 }

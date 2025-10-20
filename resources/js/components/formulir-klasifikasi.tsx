@@ -202,7 +202,7 @@ const FormKlasifikasi = ({
     const fetchByLabelSayuran = async (label: string) => {
         try {
             const response = await axios.get(route('api.get.label-sayuran-by-label', { label: label }));
-            if (response.status !== 200) throw new Error('Failed to fetch label sayuran');
+            if (response.status !== 200) throw new Error('Failed to fetch rekomendasi makanan');
             const data: any = await response.data;
             console.log(data);
             setData((prev) => ({ ...prev, statusGizi: data }));

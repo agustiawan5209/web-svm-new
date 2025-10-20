@@ -98,7 +98,7 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
     if (auth.role == 'super_admin') {
         navItems.push(
             { name: 'Label', icon: <BarChart2Icon size={20} />, href: route('admin.label.index'), active: 'label' },
-            { name: 'Label Sayuran', icon: <BarChart3 size={20} />, href: route('admin.labelSayuran.index'), active: 'label-sayuran' },
+            { name: 'Rekomendasi Makanan', icon: <BarChart3 size={20} />, href: route('admin.labelSayuran.index'), active: 'label-sayuran' },
 
             // { name: 'Jenis Sayuran', icon: <LeafyGreen size={20} />, href: route('admin.jenisTanaman.index'), active: 'jenis-tanaman' },
         );

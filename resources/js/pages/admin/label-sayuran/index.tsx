@@ -206,7 +206,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
             <Dialog open={isOpenDialog} onOpenChange={setIsOpenDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editId ? `Edit` : `Tambah`} Label Sayuran</DialogTitle>
+                        <DialogTitle>{editId ? `Edit` : `Tambah`} Rekomendasi Makanan</DialogTitle>
                     </DialogHeader>
                     <form className="space-y-4" onSubmit={submit}>
                         <div className="grid gap-4">

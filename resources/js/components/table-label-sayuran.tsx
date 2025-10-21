@@ -18,7 +18,7 @@ export default function TableLabelSayuran({ data }: { data: LabelSayuranTypes[] 
                 <TableRow>
                     <TableHead className="w-10">No.</TableHead>
                     <TableHead className="cursor-pointer">Nama Label</TableHead>
-                    <TableHead className="cursor-pointer">sayuran</TableHead>
+                    <TableHead className="cursor-pointer">Makanan</TableHead>
                     <TableHead className="cursor-pointer">Porsi</TableHead>
                     <TableHead className="cursor-pointer">Tekstur</TableHead>
                     <TableHead className="cursor-pointer">Frekuensi</TableHead>

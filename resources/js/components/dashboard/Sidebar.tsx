@@ -100,7 +100,7 @@ const Sidebar = ({ className, collapsed = false, onToggleCollapse, handleSidebar
             { name: 'Label', icon: <BarChart2Icon size={20} />, href: route('admin.label.index'), active: 'label' },
             { name: 'Rekomendasi Makanan', icon: <BarChart3 size={20} />, href: route('admin.labelSayuran.index'), active: 'label-sayuran' },
 
-            // { name: 'Jenis Sayuran', icon: <LeafyGreen size={20} />, href: route('admin.jenisTanaman.index'), active: 'jenis-tanaman' },
+            // { name: 'Jenis Makanan', icon: <LeafyGreen size={20} />, href: route('admin.jenisTanaman.index'), active: 'jenis-tanaman' },
         );
     }
 

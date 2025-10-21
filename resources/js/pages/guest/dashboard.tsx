@@ -18,7 +18,7 @@ export default function GuestDashboard({ distributionLabel, label, training, kri
             <Head title="Dashboard" />
             <div className="mx-auto max-w-7xl">
                 <header className="mb-8">
-                    <p className="mt-1 text-muted-foreground">Dashboard Rekomendasi Jenis Sayuran </p>
+                    <p className="mt-1 text-muted-foreground">Dashboard Rekomendasi Jenis Makanan </p>
                 </header>
 
                 {/* Hero Section */}

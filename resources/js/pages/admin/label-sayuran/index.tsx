@@ -144,7 +144,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                 <TableRow>
                                     <TableHead className="cursor-pointer">no</TableHead>
                                     <TableHead className="cursor-pointer">Nama Label</TableHead>
-                                    <TableHead className="cursor-pointer">sayuran</TableHead>
+                                    <TableHead className="cursor-pointer">Makanan</TableHead>
                                     <TableHead className="cursor-pointer">Porsi</TableHead>
                                     <TableHead className="cursor-pointer">Tekstur</TableHead>
                                     <TableHead className="cursor-pointer">Frekuensi</TableHead>
@@ -230,7 +230,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="sayuran" className="text-sm font-medium">
-                                    Nama Sayuran
+                                    Nama Makanan
                                 </Label>
                                 <Input
                                     type="text"

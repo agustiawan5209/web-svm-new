@@ -19,7 +19,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Dashboard', icon: Home, href: route('dashboard') },
     { title: 'Kriteria', icon: BarChart2Icon, href: route('admin.kriteria.index') },
     { title: 'Label', icon: BarChart2Icon, href: route('admin.label.index') },
-    { title: 'Jenis Sayuran', icon: LeafyGreen, href: route('admin.jenisTanaman.index') },
+    { title: 'Jenis Makanan', icon: LeafyGreen, href: route('admin.jenisTanaman.index') },
     { title: 'Training Gizi', icon: FolderClockIcon, href: route('admin.dataset.index') },
     { title: 'Support Vector Machine', icon: GalleryHorizontal, href: route('ModelStorageindex') },
     { title: 'Riwayat Rekomendasi', icon: FolderClockIcon, href: route('admin.riwayat.index') },

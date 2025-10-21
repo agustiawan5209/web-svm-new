@@ -113,7 +113,7 @@ Route::middleware(['auth', 'verified', 'role:admin|super_admin'])->group(functio
             });
         });
 
-        // Route for Jenis Sayuran
+        // Route for Jenis Makanan
         Route::group(['prefix' => 'jenis-tanaman', 'as' => 'jenisTanaman.'], function () {
             Route::controller(JenisTanamanController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
@@ -171,7 +171,7 @@ Route::get('/model-storage/get-model', [ModelStorageController::class, 'getModel
 Route::get('/api/model-storage/get-data', [ModelStorageController::class, 'getData'])->name('api.ModelStorage.getData');
 
 
-// Get Jenis Sayuran Berdasarkan nama gizi
+// Get Jenis Makanan Berdasarkan nama gizi
 Route::get('/api/get-sayuran', [JenisTanamanController::class, 'getSayuran'])->name('api.get.sayuran');
 
 // get pasien by nik

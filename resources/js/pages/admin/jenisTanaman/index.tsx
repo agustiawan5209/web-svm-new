@@ -106,7 +106,7 @@ export default function JenisTanamanIndex({ jenisTanaman, breadcrumb, titlePage,
             <Card>
                 <div className="px-2">
                     <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 className="text-lg font-bold md:text-xl">Jenis Sayuran</h2>
+                        <h2 className="text-lg font-bold md:text-xl">Jenis Makanan</h2>
                         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                             {can?.add && (
                                 <Button variant={'default'} type="button" className="cursor-pointer" onClick={() => setIsOpenDialog(true)}>
@@ -177,7 +177,7 @@ export default function JenisTanamanIndex({ jenisTanaman, breadcrumb, titlePage,
             <Dialog open={isOpenDialog} onOpenChange={setIsOpenDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editId ? `Edit` : `Tambah`} Jenis Sayuran</DialogTitle>
+                        <DialogTitle>{editId ? `Edit` : `Tambah`} Jenis Makanan</DialogTitle>
                     </DialogHeader>
                     <form className="space-y-4" onSubmit={submit}>
                         <div className="grid gap-4">
@@ -199,7 +199,7 @@ export default function JenisTanamanIndex({ jenisTanaman, breadcrumb, titlePage,
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="deskripsi" className="text-sm font-medium">
-                                    Keterangan Sayuran
+                                    Keterangan Makanan
                                 </Label>
                                 <textarea
                                     rows={4}

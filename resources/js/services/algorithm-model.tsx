@@ -665,7 +665,7 @@ class SVMModel {
                     })[0]?.deskripsi || '';
             }
         } catch (err) {
-            console.log('Terjadi kesalahan ketika memuat data sayuran :', err);
+            console.log('Terjadi kesalahan ketika memuat data Makanan :', err);
         }
 
         return {

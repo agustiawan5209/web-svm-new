@@ -67,7 +67,7 @@ export default function FormLoopKriteria({
                             </div>
                         );
                     }
-                    if (lowerCaseName === 'pola makan') {
+                    if (lowerCaseName === 'frekuensi makan') {
                         return (
                             <div key={index} className="space-y-2">
                                 <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
@@ -80,9 +80,57 @@ export default function FormLoopKriteria({
                                         <SelectValue placeholder="Select " />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
-                                        {['kurang', 'sedang', 'baik'].map((jenkel, idx) => (
-                                            <SelectItem key={idx} value={jenkel} className="px-4 py-2 hover:bg-gray-50">
-                                                {jenkel}
+                                        {['1 kali/hari', '2 kali/hari', '3 kali/hari', '>3 kali/hari'].map((makan, idx) => (
+                                            <SelectItem key={idx} value={idx.toString()} className="px-4 py-2 hover:bg-gray-50">
+                                                {makan}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        );
+                    }
+                    if (lowerCaseName.includes('konsumsi lauk hewani')) {
+                        return (
+                            <div key={index} className="space-y-2">
+                                <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
+                                <Select
+                                    value={data.kriteria?.[index].nilai || ''}
+                                    required
+                                    onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
+                                >
+                                    <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                        <SelectValue placeholder="Select " />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
+                                        {['Tidak pernah (0 kali/minggu)', '1–2 kali/minggu', '3–4 kali/minggu', '≥5 kali/minggu'].map(
+                                            (makan, idx) => (
+                                                <SelectItem key={idx} value={idx.toString()} className="px-4 py-2 hover:bg-gray-50">
+                                                    {makan}
+                                                </SelectItem>
+                                            ),
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        );
+                    }
+                    if (lowerCaseName.includes('porsi sayur')) {
+                        return (
+                            <div key={index} className="space-y-2">
+                                <Label className="text-sm font-medium text-gray-700">{item.nama}</Label>
+                                <Select
+                                    value={data.kriteria?.[index].nilai || ''}
+                                    required
+                                    onValueChange={(value) => handleSelectChange(index.toLocaleString(), value)}
+                                >
+                                    <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                        <SelectValue placeholder="Select " />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-lg border border-gray-200 shadow-lg">
+                                        {['0 Porsi', '1 Porsi', '2 Porsi', '>3 Porsi'].map((makan, idx) => (
+                                            <SelectItem key={idx} value={idx.toString()} className="px-4 py-2 hover:bg-gray-50">
+                                                {makan}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

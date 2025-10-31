@@ -14,7 +14,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // dd(Label::orderBy('id', 'desc')->get());
         $label = Label::select('nama')->orderBy('id', 'asc')->get()->pluck('nama')->toArray();
 
         $data = $this->getData();
@@ -27,44 +26,55 @@ class DashboardController extends Controller
         }])->latest()->get()->map(function ($item) {
             $pemeriksaan = $item->pemeriksaan->first();
 
-            $kriteria = Kriteria::all();
-            $umur = now()->diff($item->tanggal_lahir)->y;
-            $item->umur = $umur;
+            // Initialize default values
+            $umur_kehamilan = null;
+            $berat_badan = null;
+            $tinggi_badan = null;
+            $label = null;
+            $tgl_pemeriksaan = null;
 
-            foreach ($kriteria as $kri) {
+            // Only process if pemeriksaan exists
+            if ($pemeriksaan) {
+                $kriteria = Kriteria::all();
+                $umur = now()->diff($item->tanggal_lahir)->y;
+                $item->umur = $umur;
 
-                if (in_array(strtolower($kri->nama), ['usia kehamilan', 'umur kehamilan',])) {
-                    $item->umur_kehamilan = $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first() ? $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first()->nilai : null;
-                    continue;
+                foreach ($kriteria as $kri) {
+                    $detail = $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first();
+
+                    if (in_array(strtolower($kri->nama), ['usia kehamilan', 'umur kehamilan'])) {
+                        $umur_kehamilan = $detail ? $detail->nilai : null;
+                        continue;
+                    }
+                    if (in_array(strtolower($kri->nama), ['bb (kg)', 'berat badan'])) {
+                        $berat_badan = $detail ? $detail->nilai : null;
+                        continue;
+                    }
+                    if (in_array(strtolower($kri->nama), ['tb (cm)', 'tinggi badan'])) {
+                        $tinggi_badan = $detail ? $detail->nilai : null;
+                        continue;
+                    }
                 }
-                if (in_array(strtolower($kri->nama), ['bb (kg)', 'berat badan'])) {
-                    $item->berat_badan = $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first() ? $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first()->nilai : null;
-                    continue;
-                }
-                if (in_array(strtolower($kri->nama), ['tb (cm)', 'tinggi badan'])) {
-                    $item->tinggi_badan = $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first() ? $pemeriksaan->detailpemeriksaan->where('kriteria_id', $kri->id)->first()->nilai : null;
-                    continue;
-                }
+
+                $label = str_replace('gizi ', '', strtolower($pemeriksaan->label ?? ''));
+                $tgl_pemeriksaan = $pemeriksaan->tgl_pemeriksaan;
             }
 
-            $label = str_replace('gizi ', '', strtolower($pemeriksaan ? $pemeriksaan->label : ''));
-            // dd($label);
             return [
                 'id' => $item->id,
                 'name' => $item->nama,
-                'age' => $item->umur,
-                'weight' => $pemeriksaan ? $item->berat_badan : null,
-                'height' => $pemeriksaan ? $item->tinggi_badan : null,
-                'pregnancyAge' => $pemeriksaan ? $item->umur_kehamilan : null,
-                'lastCheckup' => $pemeriksaan ? $pemeriksaan->tgl_pemeriksaan : null,
+                'age' => $item->umur ?? now()->diff($item->tanggal_lahir)->y,
+                'weight' => $berat_badan,
+                'height' => $tinggi_badan,
+                'pregnancyAge' => $umur_kehamilan,
+                'lastCheckup' => $tgl_pemeriksaan,
                 'nutritionStatus' => [
-                    'status' => $pemeriksaan ? $label : null,
-                    'color' => $pemeriksaan && $label == 'gizi baik' ? 'bg-green-500' : 'bg-red-500',
+                    'status' => $label,
+                    'color' => $label == 'gizi baik' ? 'bg-green-500' : ($label ? 'bg-red-500' : 'bg-gray-500'),
                 ],
             ];
         })->toArray();
 
-        // dd($pasien);
         return Inertia::render("dashboard", [
             "distributionLabel" => $distributionLabel,
             "training" => count($training),
@@ -75,7 +85,6 @@ class DashboardController extends Controller
             "patients" => $pasien,
         ]);
     }
-
     private function getData()
     {
         // Logic to retrieve data for the Support Vector Machine model

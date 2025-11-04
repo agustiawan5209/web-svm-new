@@ -2,13 +2,14 @@ import ClassifyPemeriksaan from '@/components/classify-pemeriksaan';
 import { Card, CardContent } from '@/components/ui/card';
 import { Toast } from '@/components/ui/toast';
 import UserAuthLayout from '@/layouts/guest/user-auth-layout';
-import { KriteriaTypes, PredictionResult, SharedData, User, type BreadcrumbItem } from '@/types';
+import { KriteriaTypes, PasienTypes, PredictionResult, SharedData, User, type BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 
 export interface PemeriksaanGuestCreateProps {
     breadcrumb?: { title: string; href: string }[];
     pasien: User[];
+    pasienId: PasienTypes | null;
     kriteria: KriteriaTypes[];
 }
 
@@ -37,7 +38,7 @@ type CreateForm = {
     statusGizi: string[];
 };
 
-export default function PemeriksaanGuestCreate({ breadcrumb, pasien, kriteria }: PemeriksaanGuestCreateProps) {
+export default function PemeriksaanGuestCreate({ breadcrumb, pasien, pasienId, kriteria }: PemeriksaanGuestCreateProps) {
     const { auth } = usePage<SharedData>().props;
     // Memoize breadcrumbs to prevent unnecessary recalculations
     const breadcrumbs: BreadcrumbItem[] = useMemo(
@@ -60,13 +61,13 @@ export default function PemeriksaanGuestCreate({ breadcrumb, pasien, kriteria }:
     const day = today.toISOString().split('T')[0];
     const { data, setData, post, processing, errors } = useForm<CreateForm>({
         rme: '',
-        nik: '',
+        nik: pasienId ? pasienId.nik : '',
         user_id: auth.user.id.toString(),
-        nama: '',
-        tempat_lahir: '',
-        tanggal_lahir: '',
-        jenis_kelamin: '',
-        alamat: '',
+        nama: pasienId ? pasienId.nama : '',
+        tempat_lahir: pasienId ? pasienId.tempat_lahir : '',
+        tanggal_lahir: pasienId ? pasienId.tanggal_lahir : '',
+        jenis_kelamin: pasienId ? pasienId.jenis_kelamin : '',
+        alamat: pasienId ? pasienId.user.alamat : '',
         tanggal_pemeriksaan: day,
         kriteria: kriteria.map((attr) => ({ nilai: null, kriteria_id: attr.id.toString(), name: attr.nama })),
         label: '',
@@ -104,6 +105,7 @@ export default function PemeriksaanGuestCreate({ breadcrumb, pasien, kriteria }:
         }
     }, [prediction]);
 
+    console.log(pasienId);
     return (
         <UserAuthLayout>
             <Head title="Create" />

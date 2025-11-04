@@ -367,6 +367,8 @@ const FormKlasifikasi = ({
     const tahunLalu = new Date(today);
     tahunLalu.setFullYear(today.getFullYear() - 15);
     const minDate = tahunLalu.toISOString().split('T')[0];
+    tahunLalu.setFullYear(today.getFullYear() - 51);
+    const maxDate = tahunLalu.toISOString().split('T')[0];
 
     function hitungUsia(tanggalLahir: string) {
         const birthDate = new Date(tanggalLahir);

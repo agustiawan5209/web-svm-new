@@ -98,7 +98,7 @@ const ClassifyPemeriksaan = ({
     const [isError, setIsError] = useState(false);
     const today = new Date();
 
-    const [nikPasien, setNikPasien] = useState('');
+    const [nikPasien, setNikPasien] = useState(data.nik || '');
     const [toast, setToast] = useState<{
         title: string;
         show: boolean;

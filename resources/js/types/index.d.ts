@@ -42,7 +42,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
-    alamat?: string;
+    alamat: string;
     nohp?: string;
     jenis_kelamin?: string;
     tempat_lahir?: string;
@@ -112,6 +112,7 @@ export interface PasienTypes {
     tempat_lahir: string;
     tanggal_lahir: string;
     jenis_kelamin: string;
+    alamat: string;
     user_id: string;
     user: User;
 }

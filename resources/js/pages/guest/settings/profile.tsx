@@ -1,4 +1,4 @@
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { PasienTypes, type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -8,7 +8,7 @@ import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input, InputRadio } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import UserAuthLayout from '@/layouts/guest/user-auth-layout';
 
@@ -27,21 +27,21 @@ type ProfileForm = {
     nohp: string;
     jenis_kelamin: string;
     tempat_lahir: string;
-    tgl_lahir: string;
+    tanggal_lahir: string;
 };
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+export default function Profile({ mustVerifyEmail, status, pasien }: { mustVerifyEmail: boolean; status?: string; pasien: PasienTypes }) {
     const { auth } = usePage<SharedData>().props;
     console.log(auth.user);
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
-        nik: auth.user.nik ?? '',
+        nik: pasien.nik ?? '',
         name: auth.user.name,
         email: auth.user.email,
         alamat: auth.user.alamat ?? '',
         nohp: auth.user.nohp ?? '',
         jenis_kelamin: auth.user.jenis_kelamin ?? '',
-        tempat_lahir: auth.user.tempat_lahir ?? '',
-        tgl_lahir: auth.user.tgl_lahir ?? '',
+        tempat_lahir: pasien.tempat_lahir ?? '',
+        tanggal_lahir: pasien.tanggal_lahir ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -155,22 +155,22 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <InputError message={errors.tempat_lahir} />
                                 </div>
                                 <div className="col-span-2 grid gap-2">
-                                    <Label htmlFor="tgl_lahir">Tanggal Lahir</Label>
+                                    <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
                                     <Input
-                                        id="tgl_lahir"
+                                        id="tanggal_lahir"
                                         type="date"
                                         required
                                         tabIndex={2}
-                                        autoComplete="tgl_lahir"
-                                        value={data.tgl_lahir}
-                                        onChange={(e) => setData('tgl_lahir', e.target.value)}
+                                        autoComplete="tanggal_lahir"
+                                        value={data.tanggal_lahir}
+                                        onChange={(e) => setData('tanggal_lahir', e.target.value)}
                                         disabled={processing}
                                         placeholder="tanggal lahir......."
                                     />
-                                    <InputError message={errors.tgl_lahir} />
+                                    <InputError message={errors.tanggal_lahir} />
                                 </div>
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
                                 <InputRadio
                                     id="jenis1"
@@ -193,7 +193,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     labelClassName="text-gray-800 dark:text-white"
                                 />
                                 <InputError message={errors.jenis_kelamin} />
-                            </div>
+                            </div> */}
 
                             {mustVerifyEmail && auth.user.email_verified_at === null && (
                                 <div>

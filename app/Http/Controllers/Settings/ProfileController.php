@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Pasien;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Http\Requests\Settings\ProfileUpdateRequest;
 
 class ProfileController extends Controller
 {
@@ -18,7 +19,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-         $user = Auth::user();
+        $user = Auth::user();
         if ($user->hasRole(['admin', 'super_admin'])) {
             return Inertia::render('settings/profile', [
                 'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
@@ -28,6 +29,7 @@ class ProfileController extends Controller
         return Inertia::render('guest/settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'pasien' => Pasien::where('user_id', '=', Auth::user()->id)->with(['user'])->first(),
         ]);
     }
 
@@ -43,6 +45,17 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        $pasien = Pasien::where('user_id', $request->user()->id)->first();
+        $pasien->update([
+            'nik' => $request->nik,
+            'tempat_lahir' => $request->tempat_lahir,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => "Perempuan",
+            'nama' => $request->name,
+            'alamat' => $request->alamat,
+            'nohp' => $request->nohp,
+        ]);
 
         return to_route('profile.edit');
     }

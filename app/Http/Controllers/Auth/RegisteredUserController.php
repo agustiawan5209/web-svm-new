@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pasien;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -47,6 +48,17 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        $pasien = Pasien::create([
+            'user_id' => $user->id,
+            'nik' => $request->nik,
+            'tempat_lahir' => $request->tempat_lahir,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => "Perempuan",
+            'nama' => $request->name,
+            'alamat' => $request->alamat,
+            'nohp' => $request->nohp,
+        ]);
 
         $user->assignRole('user');
         Auth::login($user);

@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { Calendar, LoaderCircle, MapPin } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
@@ -10,6 +10,9 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 type RegisterForm = {
+    nik: string;
+    tempat_lahir: string;
+    tanggal_lahir: string;
     name: string;
     email: string;
     password: string;
@@ -20,6 +23,9 @@ type RegisterForm = {
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
+        nik: '',
+        tempat_lahir: '',
+        tanggal_lahir: '',
         name: '',
         email: '',
         alamat: '',
@@ -32,15 +38,37 @@ export default function Register() {
         e.preventDefault();
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
-            onError:(err)=> console.log(err),
+            onError: (err) => console.log(err),
         });
     };
-
+    const today = new Date();
+    // Handle Input data anak
+    const tahunLalu = new Date(today);
+    tahunLalu.setFullYear(today.getFullYear() - 12);
+    const maxDate = tahunLalu.toISOString().split('T')[0];
+    tahunLalu.setFullYear(today.getFullYear() - 51);
+    const minDate = tahunLalu.toISOString().split('T')[0];
     return (
         <AuthLayout title="Buat Akun" description="isi form sebelum masuk">
             <Head title="Register" />
             <form className="flex flex-col gap-6" onSubmit={submit}>
                 <div className="grid gap-6">
+                    <div className="grid gap-2">
+                        <Label htmlFor="nik">NIK (Nomor Induk Kependudukan)</Label>
+                        <Input
+                            id="nik"
+                            type="text"
+                            required
+                            autoFocus
+                            tabIndex={1}
+                            autoComplete="nik"
+                            value={data.nik}
+                            onChange={(e) => setData('nik', e.target.value)}
+                            disabled={processing}
+                            placeholder="nik"
+                        />
+                        <InputError message={errors.nik} className="mt-2" />
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="name">Nama Lengkap</Label>
                         <Input
@@ -87,6 +115,59 @@ export default function Register() {
                             placeholder="masukkan alamat"
                         />
                         <InputError message={errors.alamat} />
+                    </div>
+                    {/* Birth Information */}
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="tempat_lahir" className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-slate-500" />
+                                Tempat Lahir
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="tempat_lahir"
+                                    type="text"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="tempat_lahir"
+                                    value={data.tempat_lahir}
+                                    onChange={(e) => setData({ ...data, tempat_lahir: e.target.value })}
+                                    disabled={processing}
+                                    placeholder="Kota tempat lahir"
+                                    className="pl-10"
+                                />
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <MapPin className="h-4 w-4 text-slate-400" />
+                                </div>
+                            </div>
+                            <InputError message={errors.tempat_lahir} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="tanggal_lahir" className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-slate-500" />
+                                Tanggal Lahir
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="tanggal_lahir"
+                                    type="date"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="tanggal_lahir"
+                                    value={data.tanggal_lahir}
+                                    max={maxDate}
+                                    min={minDate}
+                                    onChange={(e) => setData({ ...data, tanggal_lahir: e.target.value })}
+                                    disabled={processing}
+                                    className="pl-10"
+                                />
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <Calendar className="h-4 w-4 text-slate-400" />
+                                </div>
+                            </div>
+                            <InputError message={errors.tanggal_lahir} />
+                        </div>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="nohp">No. WhatsApp</Label>

@@ -102,6 +102,7 @@ class KlasifikasiController extends Controller
                 ->get(),
             'pasien' => Pasien::orderBy('id')->with(['user'])->get(),
             'label' => array_map(fn($label) => ['nama' => $label], $statusLabel),
+            'pasienId' => Pasien::where('user_id', '=', Auth::user()->id)->with(['user'])->first(),
             'breadcrumb' => array_merge(self::BASE_BREADCRUMB, [
                 [
                     'title' => 'tambah pemeriksaan',

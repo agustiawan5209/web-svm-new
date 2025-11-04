@@ -46,16 +46,18 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        $pasien = Pasien::where('user_id', $request->user()->id)->first();
-        $pasien->update([
-            'nik' => $request->nik,
-            'tempat_lahir' => $request->tempat_lahir,
-            'tanggal_lahir' => $request->tanggal_lahir,
-            'jenis_kelamin' => "Perempuan",
-            'nama' => $request->name,
-            'alamat' => $request->alamat,
-            'nohp' => $request->nohp,
-        ]);
+        Pasien::updateOrCreate(
+            ['user_id' => $request->user()->id], // kondisi pencarian
+            [   // data yang akan diupdate atau dibuat
+                'nik' => $request->nik,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'jenis_kelamin' => "Perempuan",
+                'nama' => $request->name,
+                'alamat' => $request->alamat,
+                'nohp' => $request->nohp,
+            ]
+        );
 
         return to_route('profile.edit');
     }

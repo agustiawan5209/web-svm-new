@@ -34,14 +34,14 @@ export default function Profile({ mustVerifyEmail, status, pasien }: { mustVerif
     const { auth } = usePage<SharedData>().props;
     console.log(auth.user);
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
-        nik: pasien.nik ?? '',
+        nik: pasien ? pasien.nik : '',
         name: auth.user.name,
         email: auth.user.email,
         alamat: auth.user.alamat ?? '',
         nohp: auth.user.nohp ?? '',
         jenis_kelamin: auth.user.jenis_kelamin ?? '',
-        tempat_lahir: pasien.tempat_lahir ?? '',
-        tanggal_lahir: pasien.tanggal_lahir ?? '',
+        tempat_lahir: pasien ? pasien.tempat_lahir : '',
+        tanggal_lahir: pasien ? pasien.tanggal_lahir : '',
     });
 
     const submit: FormEventHandler = (e) => {

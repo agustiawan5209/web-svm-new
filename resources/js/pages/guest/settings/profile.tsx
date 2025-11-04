@@ -51,7 +51,13 @@ export default function Profile({ mustVerifyEmail, status, pasien }: { mustVerif
             preserveScroll: true,
         });
     };
-
+    const today = new Date();
+    // Handle Input data anak
+    const tahunLalu = new Date(today);
+    tahunLalu.setFullYear(today.getFullYear() - 12);
+    const maxDate = tahunLalu.toISOString().split('T')[0];
+    tahunLalu.setFullYear(today.getFullYear() - 51);
+    const minDate = tahunLalu.toISOString().split('T')[0];
     return (
         <UserAuthLayout>
             <Head title="Profile settings" />
@@ -162,6 +168,8 @@ export default function Profile({ mustVerifyEmail, status, pasien }: { mustVerif
                                         required
                                         tabIndex={2}
                                         autoComplete="tanggal_lahir"
+                                        max={maxDate}
+                                        min={minDate}
                                         value={data.tanggal_lahir}
                                         onChange={(e) => setData('tanggal_lahir', e.target.value)}
                                         disabled={processing}

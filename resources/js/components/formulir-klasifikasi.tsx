@@ -365,10 +365,10 @@ const FormKlasifikasi = ({
 
     // Handle Input data anak
     const tahunLalu = new Date(today);
-    tahunLalu.setFullYear(today.getFullYear() - 15);
-    const minDate = tahunLalu.toISOString().split('T')[0];
-    tahunLalu.setFullYear(today.getFullYear() - 51);
+    tahunLalu.setFullYear(today.getFullYear() - 12);
     const maxDate = tahunLalu.toISOString().split('T')[0];
+    tahunLalu.setFullYear(today.getFullYear() - 51);
+    const minDate = tahunLalu.toISOString().split('T')[0];
 
     function hitungUsia(tanggalLahir: string) {
         const birthDate = new Date(tanggalLahir);
@@ -584,7 +584,8 @@ const FormKlasifikasi = ({
                                                 type="date"
                                                 required
                                                 tabIndex={2}
-                                                max={minDate}
+                                                max={maxDate}
+                                                min={minDate}
                                                 autoComplete="tanggal_lahir"
                                                 value={data.tanggal_lahir}
                                                 onChange={(e) => handleTanggalLahirChange(e)}

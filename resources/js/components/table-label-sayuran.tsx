@@ -18,10 +18,10 @@ export default function TableLabelSayuran({ data }: { data: LabelSayuranTypes[] 
                 <TableRow>
                     <TableHead className="w-10">No.</TableHead>
                     <TableHead className="cursor-pointer">Nama Label</TableHead>
-                    <TableHead className="cursor-pointer">Makanan</TableHead>
-                    <TableHead className="cursor-pointer">Porsi</TableHead>
-                    <TableHead className="cursor-pointer">Tekstur</TableHead>
-                    <TableHead className="cursor-pointer">Frekuensi</TableHead>
+                    {/* <TableHead className="cursor-pointer">Makanan</TableHead>
+                    <TableHead className="cursor-pointer">Porsi</TableHead> */}
+                    <TableHead className="cursor-pointer">Penanganan</TableHead>
+                    {/* <TableHead className="cursor-pointer">Frekuensi</TableHead> */}
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -30,10 +30,10 @@ export default function TableLabelSayuran({ data }: { data: LabelSayuranTypes[] 
                         <TableRow key={index}>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{item.label.nama}</TableCell>
-                            <TableCell>{item.sayuran}</TableCell>
-                            <TableCell>{item.porsi}</TableCell>
+                            {/* <TableCell>{item.sayuran}</TableCell>
+                            <TableCell>{item.porsi}</TableCell> */}
                             <TableCell>{item.tekstur}</TableCell>
-                            <TableCell>{item.frekuensi}</TableCell>
+                            {/* <TableCell>{item.frekuensi}</TableCell> */}
                         </TableRow>
                     ))
                 ) : (

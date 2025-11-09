@@ -144,10 +144,10 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                 <TableRow>
                                     <TableHead className="cursor-pointer">no</TableHead>
                                     <TableHead className="cursor-pointer">Nama Label</TableHead>
-                                    <TableHead className="cursor-pointer">Makanan</TableHead>
-                                    <TableHead className="cursor-pointer">Porsi</TableHead>
-                                    <TableHead className="cursor-pointer">Tekstur</TableHead>
-                                    <TableHead className="cursor-pointer">Frekuensi</TableHead>
+                                    {/* <TableHead className="cursor-pointer">Makanan</TableHead>
+                                    <TableHead className="cursor-pointer">Porsi</TableHead> */}
+                                    <TableHead className="cursor-pointer">Penanganan</TableHead>
+                                    {/* <TableHead className="cursor-pointer">Frekuensi</TableHead> */}
                                     {(can?.delete || can?.edit) && <TableHead className="cursor-pointer">Aksi</TableHead>}
                                 </TableRow>
                             </TableHeader>
@@ -157,10 +157,10 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                         <TableRow key={item.id}>
                                             <TableCell>{index + 1}</TableCell>
                                             <TableCell>{item.label.nama}</TableCell>
-                                            <TableCell>{item.sayuran}</TableCell>
-                                            <TableCell>{item.porsi}</TableCell>
+                                            {/* <TableCell>{item.sayuran}</TableCell>
+                                            <TableCell>{item.porsi}</TableCell> */}
                                             <TableCell>{item.tekstur}</TableCell>
-                                            <TableCell>{item.frekuensi}</TableCell>
+                                            {/* <TableCell>{item.frekuensi}</TableCell> */}
                                             {(can?.edit || can?.delete) && (
                                                 <TableCell>
                                                     <div className="flex flex-row items-center gap-2">
@@ -244,7 +244,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                 />
                                 <InputError message={errors.sayuran} className="mt-2" />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="porsi" className="text-sm font-medium">
                                     Jumlah Porsi Makanan
                                 </Label>
@@ -259,10 +259,10 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                     placeholder="Masukkan porsi"
                                 />
                                 <InputError message={errors.porsi} className="mt-2" />
-                            </div>
+                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="tekstur" className="text-sm font-medium">
-                                    Tekstur Makanan
+                                    Penanganan Makanan
                                 </Label>
                                 <Input
                                     type="text"
@@ -276,7 +276,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                 />
                                 <InputError message={errors.tekstur} className="mt-2" />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="frekuensi" className="text-sm font-medium">
                                     Frekuensi Per Hari
                                 </Label>
@@ -291,7 +291,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                     placeholder="Masukkan frekuensi"
                                 />
                                 <InputError message={errors.frekuensi} className="mt-2" />
-                            </div>
+                            </div> */}
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="secondary" onClick={() => closeDialog()}>

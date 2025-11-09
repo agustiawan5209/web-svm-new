@@ -23,10 +23,10 @@ class StoreLabelSayuranRequest extends FormRequest
     {
         return [
             'label_id' => 'required|exists:labels,id',
-            'sayuran' => 'required|string',
-            'porsi' => 'required|string',
+            'sayuran' => 'nullable|string',
+            'porsi' => 'nullable|string',
             'tekstur' => 'required|string',
-            'frekuensi' => 'required|string',
+            'frekuensi' => 'nullable|string',
         ];
     }
 }

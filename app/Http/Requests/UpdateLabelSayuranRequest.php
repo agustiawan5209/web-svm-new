@@ -24,10 +24,10 @@ class UpdateLabelSayuranRequest extends FormRequest
         return [
             'id' => 'required|exists:label_sayurans,id,' . $this->labelSayuran->id,
             'label_id' => 'required|exists:labels,id',
-            'sayuran' => 'required|string',
-            'porsi' => 'required|string',
+            'sayuran' => 'nullable|string',
+            'porsi' => 'nullable|string',
             'tekstur' => 'required|string',
-            'frekuensi' => 'required|string',
+            'frekuensi' => 'nullable|string',
         ];
     }
 }

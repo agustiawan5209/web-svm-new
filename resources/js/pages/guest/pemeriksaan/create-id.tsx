@@ -1,4 +1,4 @@
-import ClassifyPemeriksaan from '@/components/classify-pemeriksaan';
+import FormKlasifikasi from '@/components/formulir-klasifikasi';
 import { Card, CardContent } from '@/components/ui/card';
 import { Toast } from '@/components/ui/toast';
 import UserAuthLayout from '@/layouts/guest/user-auth-layout';
@@ -122,7 +122,7 @@ export default function PemeriksaanGuestCreate({ breadcrumb, pasien, pasienId, k
                     <div className="grid gap-8">
                         {/* Search Section */}
 
-                        <ClassifyPemeriksaan
+                        <FormKlasifikasi
                             submit={submit}
                             kriteria={kriteria}
                             setResult={setPrediction}

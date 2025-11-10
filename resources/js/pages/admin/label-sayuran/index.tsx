@@ -99,10 +99,10 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
     const handleEdit = (id: number) => {
         if (id) {
             const labelTemp: LabelSayuranTypes[] = listLabelSayuran.filter((item) => item.id === id, []);
-            setEditId(labelTemp[0].id);
+            setEditId(id);
             if (labelTemp) {
                 setData({
-                    id: labelTemp[0].id,
+                    id: id,
                     label_id: labelTemp[0].label_id.toLocaleString(),
                     sayuran: labelTemp[0].sayuran,
                     porsi: labelTemp[0].porsi,
@@ -228,7 +228,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                 </Select>
                                 <InputError message={errors.label_id} className="mt-2" />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="sayuran" className="text-sm font-medium">
                                     Nama Makanan
                                 </Label>
@@ -243,7 +243,7 @@ export default function LabelIndex({ label, labelSayuran, listLabelSayuran, brea
                                     placeholder="Masukkan nama-nama sayuran"
                                 />
                                 <InputError message={errors.sayuran} className="mt-2" />
-                            </div>
+                            </div> */}
                             {/* <div className="grid gap-2">
                                 <Label htmlFor="porsi" className="text-sm font-medium">
                                     Jumlah Porsi Makanan

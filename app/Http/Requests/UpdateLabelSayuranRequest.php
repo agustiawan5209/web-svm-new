@@ -22,7 +22,7 @@ class UpdateLabelSayuranRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:label_sayurans,id,' . $this->labelSayuran->id,
+            'id' => 'required|exists:label_sayurans,id',
             'label_id' => 'required|exists:labels,id',
             'sayuran' => 'nullable|string',
             'porsi' => 'nullable|string',
